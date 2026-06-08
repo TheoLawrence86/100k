@@ -243,6 +243,7 @@ h3 {
 .calendar-panel,
 .brief,
 .timeline,
+.insight-panel,
 .today,
 .logger,
 .coach-card {
@@ -254,6 +255,10 @@ h3 {
 
 .calendar-panel {
   overflow: hidden;
+}
+
+.view-panel[hidden] {
+  display: none;
 }
 
 .calendar-head,
@@ -509,6 +514,69 @@ h3 {
   overflow: auto;
 }
 
+.insight-panel {
+  overflow: hidden;
+}
+
+.insight-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 16px;
+}
+
+.insight-card,
+.kit-item {
+  min-height: 112px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--soft);
+}
+
+.insight-card strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.insight-card span,
+.kit-item span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.insight-card p,
+.kit-item p {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.kit-list {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.kit-item {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.5fr) minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  min-height: 0;
+}
+
+.kit-item strong {
+  display: block;
+  font-size: 15px;
+  line-height: 1.25;
+}
+
 table {
   width: 100%;
   min-width: 900px;
@@ -631,5 +699,10 @@ td:nth-child(1) {
 
   .week-calendar {
     grid-template-columns: 58px repeat(7, minmax(130px, 1fr));
+  }
+
+  .insight-grid,
+  .kit-item {
+    grid-template-columns: 1fr;
   }
 }
