@@ -9,6 +9,7 @@ const $ = (sel) => document.querySelector(sel);
 const datePicker = $("#datePicker");
 const searchInput = $("#searchInput");
 const planBody = $("#planBody");
+const calendarGrid = $("#calendarGrid");
 const noteBox = $("#noteBox");
 const doneToggle = $("#doneToggle");
 const actualKm = $("#actualKm");
@@ -35,6 +36,13 @@ function formatDate(iso) {
   }).format(new Date(`${iso}T12:00:00`));
 }
 
+function formatShortDate(iso) {
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+  }).format(new Date(`${iso}T12:00:00`));
+}
+
 function selectedRow() {
   return state.plan.find((row) => row.date === state.selectedDate) || state.plan[0];
 }
@@ -44,16 +52,26 @@ function rowDistance(row) {
 }
 
 function weekRows() {
+  const { monday, sunday } = weekBounds();
+  return state.plan.filter((row) => {
+    const date = new Date(`${row.date}T12:00:00`);
+    return date >= monday && date <= sunday;
+  });
+}
+
+function weekBounds() {
   const selected = new Date(`${state.selectedDate}T12:00:00`);
   const day = selected.getDay() || 7;
   const monday = new Date(selected);
   monday.setDate(selected.getDate() - day + 1);
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
-  return state.plan.filter((row) => {
-    const date = new Date(`${row.date}T12:00:00`);
-    return date >= monday && date <= sunday;
-  });
+  return { monday, sunday };
+}
+
+function isoFromDate(date) {
+  const offset = date.getTimezoneOffset();
+  return new Date(date.getTime() - offset * 60000).toISOString().slice(0, 10);
 }
 
 function rowsForMode() {
@@ -63,6 +81,28 @@ function rowsForMode() {
     rows = rows.filter((row) => Object.values(row).join(" ").toLowerCase().includes(query));
   }
   return rows;
+}
+
+function typeClass(row) {
+  const type = `${row.type || ""} ${row.session || ""}`.toLowerCase();
+  if (type.includes("long")) return "type-long";
+  if (type.includes("strength")) return "type-strength";
+  if (type.includes("recovery")) return "type-recovery";
+  if (type.includes("rest")) return "type-rest";
+  if (type.includes("mobility")) return "type-mobility";
+  if (type.includes("easy")) return "type-easy";
+  return "type-default";
+}
+
+function durationMinutes(row) {
+  const text = `${row.duration || ""}`.toLowerCase();
+  const hourMatch = text.match(/(\d+(?:\.\d+)?)\s*h/);
+  if (hourMatch) return Number.parseFloat(hourMatch[1]) * 60;
+  const minuteMatch = text.match(/(\d+)\s*m/);
+  if (minuteMatch) return Number.parseFloat(minuteMatch[1]);
+  const range = text.match(/(\d+)\s*-\s*(\d+)/);
+  if (range) return Number.parseFloat(range[2]);
+  return Math.max(45, rowDistance(row) * 13);
 }
 
 // --- persistence: every change posts the full log row for the selected day ---
@@ -140,6 +180,67 @@ function renderAdaptation() {
   }
 }
 
+function renderCalendar() {
+  if (!calendarGrid) return;
+  const { monday, sunday } = weekBounds();
+  const selected = selectedRow();
+  $("#weekRange").textContent = `${formatShortDate(isoFromDate(monday))} - ${formatShortDate(isoFromDate(sunday))}`;
+
+  const query = state.query.toLowerCase();
+  const rowsByDate = new Map(
+    weekRows()
+      .filter((row) => !query || Object.values(row).join(" ").toLowerCase().includes(query))
+      .map((row) => [row.date, row])
+  );
+
+  calendarGrid.innerHTML = "";
+  const rail = document.createElement("div");
+  rail.className = "time-rail";
+  ["Easy", "Build", "Long", "Log", "Recover"].forEach((label) => {
+    const slot = document.createElement("span");
+    slot.textContent = label;
+    rail.appendChild(slot);
+  });
+  calendarGrid.appendChild(rail);
+
+  for (let i = 0; i < 7; i += 1) {
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + i);
+    const iso = isoFromDate(date);
+    const row = rowsByDate.get(iso);
+    const column = document.createElement("div");
+    column.className = `day-column${iso === state.selectedDate ? " is-selected" : ""}`;
+
+    const heading = document.createElement("div");
+    heading.className = "day-heading";
+    heading.innerHTML = `${new Intl.DateTimeFormat("en-GB", { weekday: "short" }).format(date)}<strong>${new Intl.DateTimeFormat("en-GB", { day: "2-digit" }).format(date)}</strong>`;
+    column.appendChild(heading);
+
+    if (row) {
+      const card = document.createElement("button");
+      const height = Math.max(70, Math.min(290, durationMinutes(row) * 1.25));
+      const top = row.type === "Rest" ? 118 : row.type === "Long" ? 98 : 84 + i * 8;
+      card.type = "button";
+      card.className = `session-card ${typeClass(row)}${row.done ? " done" : ""}${row.date === selected.date ? " is-selected" : ""}`;
+      card.style.top = `${top}px`;
+      card.style.height = `${height}px`;
+      card.innerHTML = `
+        <strong>${row.session}</strong>
+        <span>${row.distance_km || 0} km · ${row.duration}</span>
+        <em>${row.type}</em>
+      `;
+      card.addEventListener("click", () => {
+        state.selectedDate = row.date;
+        datePicker.value = row.date;
+        render();
+      });
+      column.appendChild(card);
+    }
+
+    calendarGrid.appendChild(column);
+  }
+}
+
 function renderTable() {
   const rows = rowsForMode();
   planBody.innerHTML = "";
@@ -212,6 +313,7 @@ async function renderWeekBriefing() {
 
 function render() {
   renderToday();
+  renderCalendar();
   renderTable();
   renderWeekBriefing();
 }
@@ -236,16 +338,17 @@ $("#todayButton").addEventListener("click", () => {
 
 $("#weekButton").addEventListener("click", () => {
   state.mode = "week";
-  renderTable();
+  render();
 });
 
 $("#allButton").addEventListener("click", () => {
   state.mode = "all";
-  renderTable();
+  render();
 });
 
 searchInput.addEventListener("input", () => {
   state.query = searchInput.value.trim();
+  renderCalendar();
   renderTable();
 });
 
