@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>100k Training Plan</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="styles.css?v=coach-2">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <h1>100k Training</h1>
+          <p>Full Continuous Thames Path, 12 September 2026 · coach plan v2</p>
+        </div>
+        <label class="date-control">
+          <span>Date</span>
+          <input id="datePicker" type="date">
+        </label>
+      </header>
+
+      <section class="today">
+        <div>
+          <p class="kicker">Today</p>
+          <h2 id="todayTitle">Loading</h2>
+          <p id="todayMeta"></p>
+        </div>
+        <div class="detail-grid">
+          <div><span>Distance</span><strong id="todayDistance"></strong></div>
+          <div><span>Duration</span><strong id="todayDuration"></strong></div>
+          <div><span>Equipment</span><strong id="todayEquipment"></strong></div>
+          <div><span>Fuel</span><strong id="todayFuel"></strong></div>
+          <div class="wide"><span>Coach</span><strong id="todayCoach"></strong></div>
+        </div>
+      </section>
+
+      <section class="controls">
+        <button id="todayButton" type="button">Today</button>
+        <button id="weekButton" type="button">This week</button>
+        <button id="allButton" type="button">All</button>
+        <select id="statusSelect" aria-label="Adaptation status">
+          <option value="green">Green: do plan</option>
+          <option value="yellow">Yellow: cut 30-50%</option>
+          <option value="red">Red: rest only</option>
+        </select>
+        <input id="searchInput" type="search" placeholder="Search">
+      </section>
+
+      <section class="adapt">
+        <strong id="adaptTitle">Adaptation</strong>
+        <span id="adaptText">Do the plan as written.</span>
+      </section>
+
+      <section class="notes">
+        <label for="noteBox">Today notes</label>
+        <textarea id="noteBox" rows="3" placeholder="Pain, kit, food, changes"></textarea>
+      </section>
+
+      <section class="timeline">
+        <table>
+          <thead>
+            <tr>
+              <th>Done</th>
+              <th>Date</th>
+              <th>KM</th>
+              <th>Type</th>
+              <th>Session</th>
+              <th>Time</th>
+              <th>Kit</th>
+              <th>Fuel</th>
+            </tr>
+          </thead>
+          <tbody id="planBody"></tbody>
+        </table>
+      </section>
+    </main>
+
+    <script src="app.js?v=coach-2"></script>
+  </body>
+</html>

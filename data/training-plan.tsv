@@ -1,0 +1,99 @@
+date	day	week	phase	distance_km	type	session	duration	equipment	fuel	coach
+2026-06-08	Mon	1	Base	4	Easy + mobility	Easy walk/run + mobility	35-50m	Shoes; watch; mat	Water	Set baseline; finish fresh
+2026-06-09	Tue	1	Base	5	Easy	Easy walk/run	40-60m	Shoes; watch	Water	RPE 3; conversational
+2026-06-10	Wed	1	Base	0	Strength	Strength A + mobility	30m	Bands; mat	Water	Legs and core; no soreness chasing
+2026-06-11	Thu	1	Base	6	Easy	Easy walk/run + 6 relaxed pickups	50-70m	Shoes; watch	Water	Pickups smooth; not sprints
+2026-06-12	Fri	1	Base	0	Rest	Mobility only	10m	Mat	None	Feet check
+2026-06-13	Sat	1	Base	12	Long	Long flat easy	2-2.5h	Shoes; vest; bottles	Water; snack	Test shoes and socks
+2026-06-14	Sun	1	Base	3	Recovery	Recovery walk + core	35-45m	Shoes; mat	Water	Easy legs; light core
+2026-06-15	Mon	2	Base	0	Strength	Strength A + mobility	35m	Bands; mat	Water	Add calf work
+2026-06-16	Tue	2	Base	6	Easy	Easy walk/run	50-70m	Shoes; watch	Water	RPE 3
+2026-06-17	Wed	2	Base	8	Steady	Steady aerobic	70-90m	Shoes; watch	Water	RPE 4; controlled
+2026-06-18	Thu	2	Base	0	Strength	Strength B + mobility	35m	Bands; mat	Water	Single-leg control
+2026-06-19	Fri	2	Base	0	Rest	Mobility only	10m	Mat	None	Feet check
+2026-06-20	Sat	2	Base	18	Long	Long flat easy	3-4h	Shoes; vest; bottles	30g carbs/h	First proper eating practice
+2026-06-21	Sun	2	Base	6	Recovery	Recovery walk/run	60-75m	Shoes; bottles	Water	Tired-leg practice
+2026-06-22	Mon	3	Base	0	Strength	Strength A + mobility	35m	Bands; mat	Water	Controlled reps
+2026-06-23	Tue	3	Base	7	Easy	Easy walk/run	60-75m	Shoes; watch	Water	RPE 3
+2026-06-24	Wed	3	Base	10	Steady	Steady aerobic	90-110m	Shoes; watch	Water; snack	Relaxed rhythm
+2026-06-25	Thu	3	Base	5	Easy + strength	Easy walk/run + Strength B	45-60m + 25m	Shoes; bands; mat	Water	Keep strength light
+2026-06-26	Fri	3	Base	0	Rest	Mobility only	10m	Mat	None	Feet check
+2026-06-27	Sat	3	Base	20	Long	Long flat easy	3.5-4.5h	Shoes; vest; bottles	30-45g carbs/h	Eat every 30-45m
+2026-06-28	Sun	3	Base	3	Recovery	Recovery walk	35-45m	Shoes	Water	Absorb week
+2026-06-29	Mon	4	Build	0	Strength	Strength A + mobility	35m	Bands; mat	Water	Maintain form
+2026-06-30	Tue	4	Build	8	Easy	Easy walk/run	70-85m	Shoes; watch	Water	RPE 3
+2026-07-01	Wed	4	Build	12	Steady	Steady aerobic	1.75-2.25h	Shoes; bottles	Water; snack	Flat path if possible
+2026-07-02	Thu	4	Build	6	Easy + strength	Easy walk/run + Strength B	55-70m + 25m	Shoes; bands; mat	Water	No heavy legs
+2026-07-03	Fri	4	Build	0	Rest	Mobility only	10m	Mat	None	Feet check
+2026-07-04	Sat	4	Build	22	Long	Long flat easy	4-5h	Shoes; vest; bottles	30-45g carbs/h	Practise short checkpoint stops
+2026-07-05	Sun	4	Build	4	Recovery	Recovery walk	45-60m	Shoes	Water	Easy only
+2026-07-06	Mon	5	Cutback	0	Strength	Strength A light + mobility	30m	Bands; mat	Water	Cutback week
+2026-07-07	Tue	5	Cutback	6	Easy	Easy walk/run	50-65m	Shoes; watch	Water	RPE 3
+2026-07-08	Wed	5	Cutback	8	Steady	Steady aerobic	70-90m	Shoes; watch	Water	RPE 4
+2026-07-09	Thu	5	Cutback	4	Easy + strength	Easy walk/run + Strength B light	35-50m + 20m	Shoes; bands; mat	Water	Keep fresh
+2026-07-10	Fri	5	Cutback	0	Rest	Mobility only	10m	Mat	None	Feet check
+2026-07-11	Sat	5	Cutback	14	Long	Long easy	2.5-3h	Shoes; vest; bottles	Water; snack	Low stress
+2026-07-12	Sun	5	Cutback	3	Recovery	Recovery walk	35-45m	Shoes	Water	Recover
+2026-07-13	Mon	6	Build	0	Strength	Strength A + mobility	40m	Bands; mat	Water	Normal load
+2026-07-14	Tue	6	Build	8	Easy	Easy walk/run	70-85m	Shoes; watch	Water	RPE 3
+2026-07-15	Wed	6	Build	14	Steady	Steady aerobic	2-2.5h	Shoes; bottles	30g carbs/h	Fuel from 30m
+2026-07-16	Thu	6	Build	6	Easy + strength	Easy walk/run + Strength B	55-70m + 25m	Shoes; bands; mat	Water	Relaxed form
+2026-07-17	Fri	6	Build	0	Rest	Mobility only	10m	Mat	None	Feet check
+2026-07-18	Sat	6	Build	26	Long	Long flat easy	5-6h	Shoes; vest; bottles	30-60g carbs/h	Full fuel test
+2026-07-19	Sun	6	Build	6	Back-to-back	Easy tired-leg walk/run	60-80m	Shoes; bottles	Water; snack	Keep moving
+2026-07-20	Mon	7	Build	0	Strength	Strength A + mobility	40m	Bands; mat	Water	Controlled
+2026-07-21	Tue	7	Build	9	Easy	Easy walk/run	75-95m	Shoes; watch	Water	RPE 3
+2026-07-22	Wed	7	Build	15	Steady	Steady aerobic	2.25-2.75h	Shoes; bottles	30g carbs/h	Steady but easy
+2026-07-23	Thu	7	Build	7	Easy + strength	Easy walk/run + Strength B	60-80m + 25m	Shoes; bands; mat	Water	Light legs
+2026-07-24	Fri	7	Build	0	Rest	Mobility only	10m	Mat	None	Feet check
+2026-07-25	Sat	7	Build	30	Long	Long flat easy	5.5-7h	Shoes; vest; bottles	30-60g carbs/h	Checkpoint routine every hour
+2026-07-26	Sun	7	Build	7	Back-to-back	Easy tired-leg walk/run	75-95m	Shoes; bottles	Water; snack	All easy
+2026-07-27	Mon	8	Cutback + night	0	Strength	Strength A light + mobility	30m	Bands; mat	Water	Reduce load
+2026-07-28	Tue	8	Cutback + night	7	Easy	Easy walk/run	60-75m	Shoes; watch	Water	RPE 3
+2026-07-29	Wed	8	Cutback + night	12	Steady	Steady aerobic	1.75-2.25h	Shoes; bottles	Water; snack	RPE 4
+2026-07-30	Thu	8	Cutback + night	5	Easy + strength	Easy walk/run + Strength B light	45-60m + 20m	Shoes; bands; mat	Water	Stay fresh
+2026-07-31	Fri	8	Cutback + night	0	Rest	Mobility only	10m	Mat	None	Feet check
+2026-08-01	Sat	8	Cutback + night	22	Night	Evening long flat session	4-5h	Shoes; vest; head torch	30-45g carbs/h	Test lights and layers
+2026-08-02	Sun	8	Cutback + night	4	Recovery	Recovery walk	45-60m	Shoes	Water	Easy reset
+2026-08-03	Mon	9	Specific	0	Strength	Strength A + mobility	35m	Bands; mat	Water	Maintain
+2026-08-04	Tue	9	Specific	10	Easy	Easy walk/run	85-105m	Shoes; watch	Water	RPE 3
+2026-08-05	Wed	9	Specific	16	Steady	Steady aerobic	2.5-3h	Shoes; bottles	30g carbs/h	Use event snacks
+2026-08-06	Thu	9	Specific	8	Easy + strength	Easy walk/run + Strength B	70-90m + 25m	Shoes; bands; mat	Water	No fatigue debt
+2026-08-07	Fri	9	Specific	0	Rest	Mobility only	10m	Mat	None	Feet check
+2026-08-08	Sat	9	Specific	34	Long	Long full-kit session	6.5-8h	Shoes; full vest; bottles	30-60g carbs/h	Event-like; practise stops
+2026-08-09	Sun	9	Specific	8	Back-to-back	Easy tired-leg walk/run	90-110m	Shoes; bottles	Water; snack	Forward motion
+2026-08-10	Mon	10	Peak	0	Strength	Strength A light + mobility	30m	Bands; mat	Water	Light only
+2026-08-11	Tue	10	Peak	10	Easy	Easy walk/run	85-105m	Shoes; watch	Water	RPE 3
+2026-08-12	Wed	10	Peak	18	Steady	Steady aerobic	3-3.5h	Shoes; bottles	30-45g carbs/h	Flat path; eat early
+2026-08-13	Thu	10	Peak	8	Easy + strength	Easy walk/run + Strength B light	70-90m + 20m	Shoes; bands; mat	Water	Save legs
+2026-08-14	Fri	10	Peak	0	Rest	Mobility only	10m	Mat	None	Feet check
+2026-08-15	Sat	10	Peak	38	Long	Long full-kit session	7.5-9h	Shoes; full vest; bottles	30-60g carbs/h	Runnymede reset rehearsal
+2026-08-16	Sun	10	Peak	10	Back-to-back	Easy tired-leg walk/run	1.75-2.25h	Shoes; bottles	Water; snack	Easy and honest
+2026-08-17	Mon	11	Peak	0	Recovery	Mobility + easy walk	20-30m	Mat; shoes	Water	Recover from load
+2026-08-18	Tue	11	Peak	8	Easy	Easy walk/run	70-90m	Shoes; watch	Water	RPE 3
+2026-08-19	Wed	11	Peak	14	Steady	Steady aerobic	2-2.5h	Shoes; bottles	30g carbs/h	Do not force pace
+2026-08-20	Thu	11	Peak	6	Easy + strength	Maintenance strength + easy	55-70m + 20m	Bands; mat; shoes	Water	Low load
+2026-08-21	Fri	11	Peak	0	Rest	Mobility only	10m	Mat	None	Prep long kit
+2026-08-22	Sat	11	Peak	40	Rehearsal	Long session finishing near dark	8-10h	Shoes; full vest; head torch	30-60g carbs/h	Big rehearsal; no hero pace
+2026-08-23	Sun	11	Peak	22	Back-to-back	Easy recovery hike/walk	4-5h	Shoes; bottles	30-45g carbs/h	Two-day fatigue simulation
+2026-08-24	Mon	12	Taper 1	0	Strength	Strength A light + mobility	25m	Bands; mat	Water	Start taper
+2026-08-25	Tue	12	Taper 1	8	Easy	Easy walk/run	70-85m	Shoes; watch	Water	RPE 3
+2026-08-26	Wed	12	Taper 1	12	Steady	Steady aerobic	1.75-2.25h	Shoes; bottles	30g carbs/h	Keep rhythm
+2026-08-27	Thu	12	Taper 1	5	Easy + mobility	Easy walk/run + mobility	45-60m + 10m	Shoes; mat	Water	No heavy strength
+2026-08-28	Fri	12	Taper 1	0	Rest	Mobility only	10m	Mat	None	Feet check
+2026-08-29	Sat	12	Taper 1	30	Long	Long easy full-kit	5.5-7h	Shoes; vest; bottles	30-60g carbs/h	Comfortable; final big check
+2026-08-30	Sun	12	Taper 1	5	Recovery	Recovery walk/run	55-70m	Shoes; bottles	Water	Easy
+2026-08-31	Mon	13	Taper 2	0	Strength	Activation + mobility	20m	Bands; mat	Water	No soreness
+2026-09-01	Tue	13	Taper 2	6	Easy	Easy walk/run	50-65m	Shoes; watch	Water	RPE 3
+2026-09-02	Wed	13	Taper 2	8	Steady	Steady aerobic	70-90m	Shoes; watch	Water; snack	Smooth only
+2026-09-03	Thu	13	Taper 2	4	Easy + mobility	Easy walk/run + mobility	35-50m + 10m	Shoes; mat	Water	Stay loose
+2026-09-04	Fri	13	Taper 2	0	Rest	Mobility only	10m	Mat	None	Feet check
+2026-09-05	Sat	13	Taper 2	18	Long	Short long easy	3-4h	Shoes; vest; bottles	30-45g carbs/h	Final kit check; stop fresh
+2026-09-06	Sun	13	Taper 2	2	Recovery	Recovery walk	20-30m	Shoes	Water	Keep fresh
+2026-09-07	Mon	14	Race week	5	Easy + mobility	Easy walk/run + mobility	40-55m	Shoes; mat	Water	Relaxed
+2026-09-08	Tue	14	Race week	0	Activation	Activation strength only	20m	Bands; mat	Water	No fatigue
+2026-09-09	Wed	14	Race week	5	Easy	Easy walk/run	40-55m	Shoes; watch	Water	RPE 3
+2026-09-10	Thu	14	Race week	3	Easy + pack	Easy shakeout + pack check	25-35m	Shoes; vest	Water	Charge devices
+2026-09-11	Fri	14	Race week	0	Rest	Rest + mobility + feet	10m	Mat; kit	Water	Pack early
+2026-09-12	Sat	14	Event	100	Event	Full Continuous 100 km	20-36h	Event kit; lights; battery	150-400kcal/h	Start easy; reset at 50km
+2026-09-13	Sun	14	Recovery	0	Recovery	Finish + recovery	As needed	Warm clothes	Food; fluids; walk only	No training; recover
