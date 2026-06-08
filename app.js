@@ -1,15 +1,20 @@
 const state = {
   plan: [],
   mode: "week",
+  view: "calendar",
   selectedDate: todayIso(),
   query: "",
+  progress: null,
 };
 
 const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 const datePicker = $("#datePicker");
 const searchInput = $("#searchInput");
 const planBody = $("#planBody");
 const calendarGrid = $("#calendarGrid");
+const progressView = $("#progressView");
+const kitView = $("#kitView");
 const noteBox = $("#noteBox");
 const doneToggle = $("#doneToggle");
 const actualKm = $("#actualKm");
@@ -132,7 +137,7 @@ async function saveSelected() {
     readiness: saved.readiness,
     notes: saved.notes,
   });
-  renderTable();
+  render();
   refreshProgress();
 }
 
@@ -241,6 +246,93 @@ function renderCalendar() {
   }
 }
 
+function renderViewPanels() {
+  $$("[data-view]").forEach((button) => {
+    const isActive = button.dataset.view === state.view;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+
+  $$("[data-view-panel]").forEach((panel) => {
+    panel.hidden = panel.dataset.viewPanel !== state.view;
+  });
+}
+
+function renderProgressView() {
+  if (!progressView || !state.progress) return;
+  const p = state.progress;
+  const doneRows = state.plan.filter((row) => row.done);
+  const remainingRows = state.plan.filter((row) => !row.done);
+  const nextLong = remainingRows.find((row) => row.type === "Long");
+  const selectedWeekRows = weekRows();
+  const weekDone = selectedWeekRows.filter((row) => row.done).length;
+
+  progressView.innerHTML = `
+    <article class="insight-card">
+      <span>Total completed</span>
+      <strong>${p.total_completed_km} km</strong>
+      <p>${doneRows.length} sessions logged against ${p.total_planned_km} km planned.</p>
+    </article>
+    <article class="insight-card">
+      <span>This week</span>
+      <strong>${p.week_completed_km} / ${p.week_planned_km} km</strong>
+      <p>${weekDone} of ${selectedWeekRows.length} sessions are marked done in the selected week.</p>
+    </article>
+    <article class="insight-card">
+      <span>Adherence</span>
+      <strong>${p.adherence_pct}%</strong>
+      <p>${p.adherence_pct > 100 ? "Logged ahead of the plan to date." : "Compared with planned distance to date."}</p>
+    </article>
+    <article class="insight-card">
+      <span>Longest session</span>
+      <strong>${p.longest_km} km</strong>
+      <p>Longest completed session logged so far.</p>
+    </article>
+    <article class="insight-card">
+      <span>Back-to-back</span>
+      <strong>${p.back_to_back_km} km</strong>
+      <p>Best completed pair on consecutive calendar days.</p>
+    </article>
+    <article class="insight-card">
+      <span>Next long effort</span>
+      <strong>${nextLong ? `${nextLong.distance_km} km` : "Done"}</strong>
+      <p>${nextLong ? `${formatDate(nextLong.date)} · ${nextLong.session}` : "No future long sessions remaining."}</p>
+    </article>
+  `;
+}
+
+function renderKitView() {
+  if (!kitView) return;
+  const rows = weekRows();
+  kitView.innerHTML = "";
+
+  rows.forEach((row) => {
+    const item = document.createElement("article");
+    item.className = "kit-item";
+    if (row.date === state.selectedDate) item.classList.add("is-today");
+    item.innerHTML = `
+      <div>
+        <span>${formatDate(row.date)}</span>
+        <strong>${row.session}</strong>
+      </div>
+      <div>
+        <span>Equipment</span>
+        <p>${row.equipment || "None"}</p>
+      </div>
+      <div>
+        <span>Fuel</span>
+        <p>${row.fuel || "None"}</p>
+      </div>
+    `;
+    item.addEventListener("click", () => {
+      state.selectedDate = row.date;
+      datePicker.value = row.date;
+      render();
+    });
+    kitView.appendChild(item);
+  });
+}
+
 function renderTable() {
   const rows = rowsForMode();
   planBody.innerHTML = "";
@@ -274,7 +366,7 @@ function renderTable() {
       });
       row.done = Boolean(saved.done);
       if (row.date === state.selectedDate) doneToggle.checked = row.done;
-      renderTable();
+      render();
       refreshProgress();
     });
 
@@ -282,8 +374,7 @@ function renderTable() {
       if (event.target.tagName === "INPUT") return;
       state.selectedDate = row.date;
       datePicker.value = row.date;
-      renderToday();
-      renderTable();
+      render();
     });
 
     planBody.appendChild(tr);
@@ -292,12 +383,14 @@ function renderTable() {
 
 async function refreshProgress() {
   const p = await api("/progress");
+  state.progress = p;
   $("#pgCompleted").textContent = `${p.total_completed_km} km`;
   $("#pgPlanned").textContent = `${p.total_planned_km} km`;
   $("#pgAdherence").textContent = `${p.adherence_pct}%`;
   $("#pgWeek").textContent = `${p.week_completed_km} / ${p.week_planned_km} km`;
   $("#pgLongest").textContent = `${p.longest_km} km`;
   $("#pgBackToBack").textContent = `${p.back_to_back_km} km`;
+  renderProgressView();
 }
 
 async function renderWeekBriefing() {
@@ -312,9 +405,12 @@ async function renderWeekBriefing() {
 }
 
 function render() {
+  renderViewPanels();
   renderToday();
   renderCalendar();
   renderTable();
+  renderProgressView();
+  renderKitView();
   renderWeekBriefing();
 }
 
@@ -350,6 +446,20 @@ searchInput.addEventListener("input", () => {
   state.query = searchInput.value.trim();
   renderCalendar();
   renderTable();
+});
+
+$$("[data-view]").forEach((button) => {
+  button.addEventListener("click", () => {
+    state.view = button.dataset.view;
+    if (state.view !== "calendar" && state.query) {
+      state.query = "";
+      searchInput.value = "";
+    }
+    if (state.view === "plan" && state.mode === "today") {
+      state.mode = "week";
+    }
+    render();
+  });
 });
 
 doneToggle.addEventListener("change", saveSelected);
