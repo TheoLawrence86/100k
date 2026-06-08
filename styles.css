@@ -89,10 +89,97 @@ button:hover {
 .today,
 .adapt,
 .notes,
+.coach-card,
+.progress,
+.brief,
+.logger,
 .timeline {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 8px;
+}
+
+.coach-card,
+.progress,
+.brief,
+.logger {
+  padding: 18px 20px;
+  margin-bottom: 14px;
+}
+
+.coach-card {
+  border-left: 4px solid var(--accent);
+}
+
+.coach-card p,
+.brief p {
+  margin-top: 6px;
+  line-height: 1.45;
+}
+
+.muted-block {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.countdown {
+  display: grid;
+  gap: 4px;
+  text-align: right;
+}
+
+.countdown span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.countdown strong {
+  font-size: 34px;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.brief {
+  border-left: 4px solid var(--accent-2);
+}
+
+.logger-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: end;
+  margin: 12px 0;
+}
+
+.logger-row label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.logger-row label.check {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  height: 40px;
+  color: var(--ink);
+}
+
+.logger-row input[type="number"],
+.logger-row select {
+  height: 40px;
+}
+
+.logger-row input[type="number"] {
+  width: 110px;
+}
+
+.notes-label {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .today {

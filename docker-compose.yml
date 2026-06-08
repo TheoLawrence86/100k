@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # Keep the SQLite file on a named volume so logged progress survives
+      # container rebuilds and restarts.
+      DB_PATH: /app/dbdata/coach.db
+    volumes:
+      - coach-db:/app/dbdata
+
+volumes:
+  coach-db:
