@@ -3,18 +3,18 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Coach to Client - 100 km</title>
+    <title>Thames Path Ultra</title>
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="styles.css?v=planner-4">
+    <link rel="stylesheet" href="styles.css?v=planner-5">
   </head>
   <body>
     <div class="app-shell">
       <aside class="sidebar">
         <div class="brand-row">
-          <span class="brand-mark">100</span>
+          <span class="brand-mark">TPUC</span>
           <div>
-            <strong>Thames Path</strong>
-            <span>continuous ultra plan</span>
+            <strong>Thames Path Ultra</strong>
+            <span>training plan</span>
           </div>
         </div>
 
@@ -59,7 +59,7 @@
         <header class="topbar">
           <div>
             <p class="kicker">Athlete plan</p>
-            <h2 id="clientLine">Coaching plan</h2>
+            <h2 id="clientLine">Thames Path Ultra</h2>
             <p id="weekRange" class="muted-block">Loading week...</p>
           </div>
           <div class="top-actions">
@@ -151,12 +151,12 @@
             <div><span>Duration</span><strong id="todayDuration"></strong></div>
             <div><span>Equipment</span><strong id="todayEquipment"></strong></div>
             <div><span>Fuel</span><strong id="todayFuel"></strong></div>
-            <div class="wide"><span>Coach note</span><strong id="todayCoach"></strong></div>
           </div>
+          <div class="coach-note-line"><span>Coach note</span><strong id="todayCoach"></strong></div>
         </section>
 
         <section class="logger">
-          <p class="kicker">Log with your coach</p>
+          <p class="kicker">Log session</p>
           <label class="check"><input id="doneToggle" type="checkbox"> Session done</label>
           <div class="logger-row">
             <label>Actual km<input id="actualKm" type="number" min="0" step="0.5" placeholder="km"></label>
@@ -173,17 +173,17 @@
             <span id="adaptText">Do the plan as written.</span>
           </div>
           <label class="notes-label" for="noteBox">Notes to your coach</label>
-          <textarea id="noteBox" rows="5" placeholder="Pain, kit, food, sleep, changes."></textarea>
+          <textarea id="noteBox" rows="4" placeholder="Pain, kit, food, sleep, changes."></textarea>
         </section>
 
-        <section class="coach-card">
-          <p class="kicker">From your coach</p>
+        <details class="coach-card">
+          <summary>From your coach</summary>
           <p id="coachBio"></p>
           <p id="coachPhilosophy" class="muted-block"></p>
-        </section>
+        </details>
       </aside>
     </div>
 
-    <script src="app.js?v=planner-4"></script>
+    <script src="app.js?v=planner-5"></script>
   </body>
 </html>

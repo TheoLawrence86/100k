@@ -515,7 +515,7 @@ async function boot() {
 
     $("#coachTitle").textContent = coach.title;
     $("#coachName").textContent = coach.name;
-    $("#clientLine").textContent = `Coaching ${client.name} to the ${client.event}`;
+    $("#clientLine").textContent = "Thames Path Ultra";
     $("#coachBio").textContent = coach.bio;
     $("#coachPhilosophy").textContent = coach.philosophy;
     $("#daysToEvent").textContent = client.days_to_event;
