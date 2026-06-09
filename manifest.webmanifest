@@ -1,0 +1,13 @@
+{
+  "name": "Thames Path Ultra — Race Ops",
+  "short_name": "100K",
+  "description": "Coach-to-athlete training hub for the 2026 Thames Path Ultra Challenge.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0e14",
+  "theme_color": "#0b0e14",
+  "icons": [
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
