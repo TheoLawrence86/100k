@@ -61,6 +61,15 @@ CREATE TABLE IF NOT EXISTS session_log (
     notes        TEXT NOT NULL DEFAULT '',
     updated_at   TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS kit_items (
+    id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    label    TEXT NOT NULL,
+    category TEXT NOT NULL,
+    checked  INTEGER NOT NULL DEFAULT 0,
+    tested   INTEGER NOT NULL DEFAULT 0,
+    sort     INTEGER NOT NULL DEFAULT 0
+);
 """
 
 

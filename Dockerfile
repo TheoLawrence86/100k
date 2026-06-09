@@ -10,7 +10,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/ ./backend/
 COPY data/ ./data/
 COPY docs/ ./docs/
-COPY index.html app.js styles.css ./
+COPY index.html styles.css manifest.webmanifest sw.js ./
+COPY js/ ./js/
+COPY assets/ ./assets/
 
 # SQLite lives here; docker-compose mounts a volume over it so data persists.
 ENV DB_PATH=/app/dbdata/coach.db

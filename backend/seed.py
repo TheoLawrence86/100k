@@ -90,6 +90,31 @@ WEEK_BRIEFINGS = {
 }
 
 
+# Race-kit checklist, distilled from docs/logistics-checklist.md ("Kit and
+# Nutrition" plus the admin items that gate race day). ``tested`` tracks the
+# coach's rule that nothing goes to the start line untested in training.
+KIT_ITEMS = [
+    ("Feet", "Primary race shoes (worn on 30 km+ runs)"),
+    ("Feet", "Race socks + spare pairs"),
+    ("Feet", "Spare shoes/socks in Runnymede halfway bag"),
+    ("Feet", "Blister kit: tape, plasters, lube"),
+    ("Night", "Head torch (fits, charged, comfortable)"),
+    ("Night", "Backup light + spare batteries"),
+    ("Night", "Power bank + charging cables"),
+    ("Night", "Reflective layer for the night section"),
+    ("Clothing", "Waterproof jacket (tested in rain)"),
+    ("Clothing", "Warm layers for the overnight drop in temperature"),
+    ("Clothing", "Hat and gloves"),
+    ("Clothing", "Race vest/pack at event-day weight"),
+    ("Fuel", "Race nutrition: 30-60 g carbs/hour, tested on long runs"),
+    ("Fuel", "Bottles/bladder for the vest"),
+    ("Fuel", "Backup calories in case food stops disappoint"),
+    ("Admin", "Ultra Challenge app installed, event code TPC26 loaded"),
+    ("Admin", "Start time confirmed and travel to Putney planned"),
+    ("Admin", "Henley finish plan: pickup or self-supported"),
+]
+
+
 def _parse_tsv() -> list[dict]:
     with TSV_PATH.open(newline="", encoding="utf-8") as fh:
         return list(csv.DictReader(fh, delimiter="\t"))
@@ -136,4 +161,10 @@ def seed() -> None:
                     )
                     for r in rows
                 ],
+            )
+
+        if _is_empty(conn, "kit_items"):
+            conn.executemany(
+                "INSERT INTO kit_items (category, label, sort) VALUES (?, ?, ?)",
+                [(cat, label, i) for i, (cat, label) in enumerate(KIT_ITEMS)],
             )

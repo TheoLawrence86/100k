@@ -3,69 +3,64 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Coach to Client - 100 km</title>
-    <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="styles.css?v=planner-4">
+    <title>Thames Path Ultra — Race Ops</title>
+    <meta name="theme-color" content="#0b0e14">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+    <script>
+      // Apply the stored theme before first paint to avoid a flash.
+      document.documentElement.dataset.theme = localStorage.getItem("theme") || "dark";
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=modern-1">
   </head>
   <body>
     <div class="app-shell">
       <aside class="sidebar">
-        <div class="brand-row">
-          <span class="brand-mark">100</span>
+        <a class="brand-row" href="#/dashboard">
+          <span class="brand-mark" aria-hidden="true">100K</span>
           <div>
-            <strong>Thames Path</strong>
-            <span>continuous ultra plan</span>
+            <strong>Thames Path Ultra</strong>
+            <span>Putney → Henley · race ops</span>
           </div>
-        </div>
+        </a>
 
-        <nav class="side-nav" aria-label="Training views">
-          <button class="active" type="button" data-view="calendar" aria-pressed="true">Calendar</button>
-          <button type="button" data-view="plan" aria-pressed="false">Plan</button>
-          <button type="button" data-view="progress" aria-pressed="false">Progress</button>
-          <button type="button" data-view="kit" aria-pressed="false">Kit</button>
+        <nav class="side-nav" aria-label="Views">
+          <a href="#/dashboard" data-nav="dashboard">Dashboard</a>
+          <a href="#/calendar" data-nav="calendar">Calendar</a>
+          <a href="#/plan" data-nav="plan">Plan</a>
+          <a href="#/progress" data-nav="progress">Progress</a>
+          <a href="#/kit" data-nav="kit">Kit</a>
         </nav>
 
         <section class="side-block">
           <p class="kicker">Coach</p>
           <h1 id="coachName">Coach</h1>
-          <p id="coachTitle">Loading coach...</p>
-        </section>
-
-        <section class="side-block">
-          <p class="kicker">Event clock</p>
-          <div class="countdown">
-            <strong id="daysToEvent">-</strong>
-            <span>days to event</span>
-          </div>
-        </section>
-
-        <section class="side-block progress-stack">
-          <p class="kicker">Miles in the legs</p>
-          <div><span>Completed</span><strong id="pgCompleted">-</strong></div>
-          <div><span>This week</span><strong id="pgWeek">-</strong></div>
-          <div><span>Adherence</span><strong id="pgAdherence">-</strong></div>
-          <div><span>Longest</span><strong id="pgLongest">-</strong></div>
-          <div><span>Back-to-back</span><strong id="pgBackToBack">-</strong></div>
-          <div><span>Planned total</span><strong id="pgPlanned">-</strong></div>
+          <p id="coachTitle" class="muted-block">Loading coach…</p>
+          <details class="coach-card">
+            <summary>About the coach</summary>
+            <p id="coachBio"></p>
+            <p id="coachPhilosophy" class="muted-block"></p>
+          </details>
         </section>
 
         <footer class="side-footer">
-          <span class="kicker">Build</span>
+          <button id="themeToggle" type="button" aria-label="Switch theme">◐ Theme</button>
           <code id="appVersion" title="Running image version">-</code>
         </footer>
       </aside>
 
-      <main class="workbench">
+      <main class="workbench" id="main">
         <header class="topbar">
           <div>
-            <p class="kicker">Athlete plan</p>
-            <h2 id="clientLine">Coaching plan</h2>
-            <p id="weekRange" class="muted-block">Loading week...</p>
+            <p class="kicker" id="viewKicker">Athlete plan</p>
+            <h2 id="viewTitle">Dashboard</h2>
+            <p id="viewSub" class="muted-block">Loading…</p>
           </div>
           <div class="top-actions">
             <button id="todayButton" type="button">Today</button>
-            <button id="weekButton" type="button">This week</button>
-            <button id="allButton" type="button">All sessions</button>
             <label class="date-control">
               <span>Date</span>
               <input id="datePicker" type="date">
@@ -73,117 +68,176 @@
           </div>
         </header>
 
-        <div class="view-panel" data-view-panel="calendar">
-          <section class="calendar-panel">
-            <div class="calendar-head">
+        <!-- Dashboard -->
+        <section class="view bento" id="view-dashboard">
+          <article class="tile hero" id="heroTile">
+            <div class="hero-head">
+              <span class="type-chip" id="todayChip">—</span>
+              <span class="muted-block" id="todayMeta"></span>
+            </div>
+            <h2 id="todayTitle">Loading…</h2>
+
+            <div class="brief-box" id="briefBox">
+              <span class="brief-label">Coach brief</span>
+              <p id="briefText">…</p>
+            </div>
+
+            <div class="detail-grid">
+              <div><span>Distance</span><strong id="todayDistance">—</strong></div>
+              <div><span>Duration</span><strong id="todayDuration">—</strong></div>
+              <div><span>Equipment</span><strong id="todayEquipment">—</strong></div>
+              <div><span>Fuel</span><strong id="todayFuel">—</strong></div>
+            </div>
+
+            <div class="logger">
+              <label class="check switch">
+                <input id="doneToggle" type="checkbox">
+                <span class="track" aria-hidden="true"></span>
+                Session done
+              </label>
+              <div class="logger-row">
+                <label>Actual km<input id="actualKm" type="number" min="0" step="0.5" placeholder="km"></label>
+                <label>Legs
+                  <select id="readinessSelect">
+                    <option value="green">Green — do the plan</option>
+                    <option value="yellow">Yellow — cut 30-50%</option>
+                    <option value="red">Red — rest only</option>
+                  </select>
+                </label>
+              </div>
+              <label class="notes-label" for="noteBox">Notes to your coach</label>
+              <textarea id="noteBox" rows="3" placeholder="Pain, kit, food, sleep, changes."></textarea>
+            </div>
+          </article>
+
+          <article class="tile countdown-tile">
+            <p class="kicker">Race day</p>
+            <strong class="big-number" id="daysToEvent">—</strong>
+            <span class="muted-block">days to the start</span>
+            <div class="night-line" id="nightLine"></div>
+          </article>
+
+          <article class="tile week-tile">
+            <p class="kicker">This week</p>
+            <strong class="mid-number" id="weekKm">—</strong>
+            <div class="mini-chart" id="weekMiniChart"></div>
+            <span class="muted-block" id="weekTargetLine"></span>
+          </article>
+
+          <article class="tile load-tile">
+            <p class="kicker">Freshness</p>
+            <strong class="mid-number" id="loadRatio">—</strong>
+            <span class="load-status" id="loadStatus"></span>
+            <div class="mini-chart" id="loadSpark"></div>
+            <span class="muted-block" id="loadLine"></span>
+          </article>
+
+          <article class="tile metric"><p class="kicker">Adherence</p><strong id="pgAdherence">—</strong><span class="muted-block">vs plan to date</span></article>
+          <article class="tile metric"><p class="kicker">Total logged</p><strong id="pgCompleted">—</strong><span class="muted-block" id="pgPlannedLine">of planned</span></article>
+          <article class="tile metric"><p class="kicker">Longest</p><strong id="pgLongest">—</strong><span class="muted-block">single session</span></article>
+          <article class="tile metric"><p class="kicker">Back-to-back</p><strong id="pgBackToBack">—</strong><span class="muted-block">consecutive days</span></article>
+
+          <article class="tile route-tile">
+            <div class="route-head">
+              <div>
+                <p class="kicker">The journey</p>
+                <h3 id="routeCaption">Putney → Henley</h3>
+              </div>
+              <span class="muted-block" id="routeSub"></span>
+            </div>
+            <div id="routeMap" class="route-map" role="img" aria-label="Training progress along the Thames route"></div>
+          </article>
+        </section>
+
+        <!-- Calendar -->
+        <section class="view" id="view-calendar" hidden>
+          <div class="panel">
+            <div class="panel-head">
               <div class="week-nav">
-                <button id="prevWeek" type="button" aria-label="Previous week">&#9664;</button>
+                <button id="prevWeek" type="button" aria-label="Previous week">‹</button>
                 <div>
-                  <p class="kicker">Week <span id="briefWeek"></span></p>
+                  <p class="kicker">Week <span id="briefWeek"></span> · <span id="weekRange"></span></p>
                   <h3 id="briefFocus">Loading plan</h3>
                 </div>
-                <button id="nextWeek" type="button" aria-label="Next week">&#9654;</button>
+                <button id="nextWeek" type="button" aria-label="Next week">›</button>
               </div>
               <input id="searchInput" type="search" placeholder="Search sessions">
             </div>
-            <div class="week-calendar" id="calendarGrid" aria-label="Weekly training calendar"></div>
-          </section>
-
-          <section class="brief">
-            <p id="briefText"></p>
-            <span id="briefTargets" class="muted-block"></span>
-          </section>
-        </div>
-
-        <section class="timeline view-panel" data-view-panel="plan" hidden>
-          <div class="table-title">
-            <div>
-              <p class="kicker">Session detail</p>
-              <h3>Training log</h3>
-            </div>
+            <div class="week-strip" id="calendarGrid" aria-label="Weekly training sessions"></div>
           </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Done</th>
-                <th>Date</th>
-                <th>KM</th>
-                <th>Type</th>
-                <th>Session</th>
-                <th>Time</th>
-                <th>Kit</th>
-                <th>Fuel</th>
-              </tr>
-            </thead>
-            <tbody id="planBody"></tbody>
-          </table>
+          <div class="panel brief">
+            <p id="briefTextWeek"></p>
+            <span id="briefTargets" class="muted-block"></span>
+          </div>
         </section>
 
-        <section class="insight-panel view-panel" data-view-panel="progress" hidden>
-          <div class="table-title">
-            <div>
-              <p class="kicker">Progress</p>
-              <h3>Training load</h3>
+        <!-- Plan -->
+        <section class="view" id="view-plan" hidden>
+          <div class="panel table-panel">
+            <div class="panel-head">
+              <div>
+                <p class="kicker">Session detail</p>
+                <h3>Training log</h3>
+              </div>
+              <div class="top-actions">
+                <button id="weekButton" type="button">This week</button>
+                <button id="allButton" type="button">All sessions</button>
+              </div>
             </div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Done</th><th>Date</th><th>KM</th><th>Type</th><th>Session</th><th>Time</th><th>Kit</th><th>Fuel</th>
+                  </tr>
+                </thead>
+                <tbody id="planBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Progress -->
+        <section class="view" id="view-progress" hidden>
+          <div class="panel chart-panel">
+            <div class="panel-head"><div><p class="kicker">Weekly volume</p><h3>Planned vs completed</h3></div></div>
+            <div class="chart" id="weeksChart"></div>
+          </div>
+          <div class="panel chart-panel">
+            <div class="panel-head"><div><p class="kicker">The build</p><h3>Cumulative km — plan vs actual</h3></div></div>
+            <div class="chart" id="cumulativeChart"></div>
+          </div>
+          <div class="panel chart-panel">
+            <div class="panel-head"><div><p class="kicker">Training load</p><h3>7-day load vs 4-week norm</h3></div></div>
+            <div class="chart" id="loadChart"></div>
           </div>
           <div class="insight-grid" id="progressView"></div>
         </section>
 
-        <section class="insight-panel view-panel" data-view-panel="kit" hidden>
-          <div class="table-title">
-            <div>
-              <p class="kicker">Kit</p>
-              <h3>Session equipment</h3>
+        <!-- Kit -->
+        <section class="view" id="view-kit" hidden>
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="kicker">Race kit</p>
+                <h3>Checklist</h3>
+              </div>
+              <span class="muted-block" id="kitSummary"></span>
             </div>
+            <div class="kit-list" id="kitView"></div>
           </div>
-          <div class="kit-list" id="kitView"></div>
         </section>
       </main>
-
-      <aside class="right-panel">
-        <section class="today">
-          <p class="kicker">Today's session</p>
-          <h2 id="todayTitle">Loading</h2>
-          <p id="todayMeta"></p>
-
-          <div class="detail-grid">
-            <div><span>Distance</span><strong id="todayDistance"></strong></div>
-            <div><span>Duration</span><strong id="todayDuration"></strong></div>
-            <div><span>Equipment</span><strong id="todayEquipment"></strong></div>
-            <div><span>Fuel</span><strong id="todayFuel"></strong></div>
-            <div class="wide"><span>Coach note</span><strong id="todayCoach"></strong></div>
-          </div>
-        </section>
-
-        <section class="logger">
-          <p class="kicker">Log with your coach</p>
-          <label class="check"><input id="doneToggle" type="checkbox"> Session done</label>
-          <div class="logger-row">
-            <label>Actual km<input id="actualKm" type="number" min="0" step="0.5" placeholder="km"></label>
-            <label>Legs
-              <select id="readinessSelect">
-                <option value="green">Green - do the plan</option>
-                <option value="yellow">Yellow - cut 30-50%</option>
-                <option value="red">Red - rest only</option>
-              </select>
-            </label>
-          </div>
-          <div class="adapt" id="adapt">
-            <strong id="adaptTitle">Green</strong>
-            <span id="adaptText">Do the plan as written.</span>
-          </div>
-          <label class="notes-label" for="noteBox">Notes to your coach</label>
-          <textarea id="noteBox" rows="5" placeholder="Pain, kit, food, sleep, changes."></textarea>
-        </section>
-
-        <section class="coach-card">
-          <p class="kicker">From your coach</p>
-          <p id="coachBio"></p>
-          <p id="coachPhilosophy" class="muted-block"></p>
-        </section>
-      </aside>
     </div>
 
-    <script src="app.js?v=planner-4"></script>
+    <nav class="tabbar" aria-label="Views">
+      <a href="#/dashboard" data-nav="dashboard">Home</a>
+      <a href="#/calendar" data-nav="calendar">Calendar</a>
+      <a href="#/plan" data-nav="plan">Plan</a>
+      <a href="#/progress" data-nav="progress">Progress</a>
+      <a href="#/kit" data-nav="kit">Kit</a>
+    </nav>
+
+    <script type="module" src="js/main.js?v=modern-1"></script>
   </body>
 </html>

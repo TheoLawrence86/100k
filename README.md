@@ -71,7 +71,8 @@ restart.
 
 ## Project Layout
 
-- [index.html](index.html), [app.js](app.js), [styles.css](styles.css): the frontend (talks to `/api/*`).
+- [index.html](index.html), [styles.css](styles.css), [js/](js/): the frontend — dark-first bento dashboard, ES modules, dependency-free SVG charts (talks to `/api/*`).
+- [manifest.webmanifest](manifest.webmanifest), [sw.js](sw.js), [assets/icon.svg](assets/icon.svg): PWA install + offline shell.
 - [backend/main.py](backend/main.py): FastAPI app — JSON API plus the static frontend.
 - [backend/db.py](backend/db.py): SQLite connection and schema.
 - [backend/seed.py](backend/seed.py): idempotent first-run seeding from the TSV and authored coaching content.
@@ -94,6 +95,9 @@ restart.
 - `GET /api/week/{week}` — week briefing + sessions + planned/completed km.
 - `POST /api/log/{date}` — upsert done / actual km / readiness / notes for a day.
 - `GET /api/progress` — the "miles in the legs" dashboard totals.
+- `GET /api/load` — training-load model: daily acute (7-day) vs chronic (4-week) km, weekly planned-vs-completed, cumulative plan-vs-actual series.
+- `GET /api/brief?for_date=YYYY-MM-DD` — the coach's generated daily brief (readiness + load ratio + missed-session rules + week focus).
+- `GET /api/kit` / `POST /api/kit/{id}` — persistent race-kit checklist with a "tested in training" flag per item.
 - `GET /api/version` — the commit the running image was built from (`dev` locally); shown in the sidebar footer so a stale deploy is obvious.
 
 ## Immediate Next Actions
