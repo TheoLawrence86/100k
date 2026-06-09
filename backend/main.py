@@ -25,7 +25,7 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="Coach to Client — 100 km", lifespan=lifespan)
+app = FastAPI(title="Coach to Client: 100 km", lifespan=lifespan)
 
 # Baked into the image at build time (Dockerfile ARG GIT_SHA); "dev" locally.
 APP_VERSION = os.environ.get("APP_VERSION", "dev")
@@ -322,7 +322,7 @@ def get_brief(for_date: str | None = None):
     if readiness == "red":
         parts.append(
             "Red day: rest and mobility only. Sharp pain, illness, or an altered "
-            "gait means we do not run — and we will not cram this session in later."
+            "gait means we do not run, and we will not cram this session in later."
         )
     elif readiness == "yellow":
         cut = f"{planned * 0.5:.0f}-{planned * 0.7:.0f} km" if planned else "30-50% of the duration"
@@ -339,12 +339,12 @@ def get_brief(for_date: str | None = None):
             parts.append(
                 f"Heads-up: your 7-day load is {ratio}x your 4-week norm "
                 f"({load['acute_km']} km vs {load['chronic_weekly_km']} km/week). "
-                "That ramp is steep — keep the effort honest-easy today."
+                "That ramp is steep; keep the effort honest-easy today."
             )
         elif ratio < 0.8 and readiness == "green":
             parts.append(
                 f"You're fresh ({load['acute_km']} km in the last 7 days against a "
-                f"{load['chronic_weekly_km']} km/week norm) — a good day to hit the session properly."
+                f"{load['chronic_weekly_km']} km/week norm); a good day to hit the session properly."
             )
 
     yesterday = next(
@@ -353,11 +353,11 @@ def get_brief(for_date: str | None = None):
     if yesterday and not yesterday["done"] and (yesterday["distance_km"] or 0) > 0:
         if "long" in (yesterday["type"] or "").lower():
             parts.append(
-                "Yesterday's long session wasn't logged — if it didn't happen, we "
+                "Yesterday's long session wasn't logged. If it didn't happen, we "
                 "replace it with 60-90 minutes easy and move on. Never chase missed kilometres."
             )
         else:
-            parts.append("Yesterday wasn't logged — if you missed it, skip it. The plan absorbs it.")
+            parts.append("Yesterday wasn't logged. If you missed it, skip it; the plan absorbs it.")
 
     if briefing:
         parts.append(f"This week: {briefing['focus'].lower()}.")

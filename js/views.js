@@ -24,7 +24,7 @@ const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
 const VIEW_TITLES = {
-  dashboard: ["Race ops", "Dashboard"],
+  dashboard: ["The towpath journal", "Today"],
   calendar: ["Athlete plan", "Calendar"],
   plan: ["Athlete plan", "Training log"],
   progress: ["Miles in the legs", "Progress"],
@@ -65,10 +65,10 @@ export function renderDashboard() {
 
   $("#todayTitle").textContent = row.session;
   $("#todayMeta").textContent = `${formatDate(row.date)} · Week ${row.week} · ${row.phase}`;
-  $("#todayDistance").textContent = rowDistance(row) ? `${rowDistance(row)} km` : "—";
-  $("#todayDuration").textContent = row.duration || "—";
-  $("#todayEquipment").textContent = row.equipment || "—";
-  $("#todayFuel").textContent = row.fuel || "—";
+  $("#todayDistance").textContent = rowDistance(row) ? `${rowDistance(row)} km` : "-";
+  $("#todayDuration").textContent = row.duration || "-";
+  $("#todayEquipment").textContent = row.equipment || "-";
+  $("#todayFuel").textContent = row.fuel || "-";
 
   $("#doneToggle").checked = Boolean(row.done);
   $("#actualKm").value = row.completed_km ?? "";
@@ -103,7 +103,7 @@ function renderCountdownTile() {
     $("#nightLine").innerHTML =
       `Sat 12 – Sun 13 Sep 2026 · Putney → Henley<br>` +
       `Night section: sunset ${client.night.sunset} → sunrise ${client.night.sunrise} ` +
-      `(~${client.night.dark_hours} h dark — train the head torch)`;
+      `(~${client.night.dark_hours} h dark, so train the head torch)`;
   }
 }
 
@@ -125,13 +125,13 @@ function renderLoadTile() {
   const el = $("#loadRatio");
   const status = $("#loadStatus");
   if (ratio === null) {
-    el.textContent = "—";
+    el.textContent = "-";
     status.textContent = "Building a baseline";
     status.className = "load-status";
   } else {
     el.textContent = `${ratio.toFixed(2)}×`;
     const [cls, label] =
-      ratio > 1.5 ? ["red", "Ramping hard — be careful"]
+      ratio > 1.5 ? ["red", "Ramping hard, be careful"]
       : ratio > 1.3 ? ["yellow", "Pushing on"]
       : ratio < 0.8 ? ["green", "Fresh"]
       : ["green", "In the groove"];
@@ -163,7 +163,7 @@ function renderRouteTile() {
   $("#routeCaption").textContent =
     fraction <= 0.005
       ? "The build starts at Putney Bridge"
-      : `Your training has carried you ${wp.km} km up the Thames — level with ${wp.name}`;
+      : `Your training has carried you ${wp.km} km up the Thames, level with ${wp.name}`;
   $("#routeSub").textContent =
     `${p.total_completed_km} of ${p.total_planned_km} training km = ${Math.round(fraction * 100)}% of the way to Henley`;
 }
@@ -253,14 +253,14 @@ export function renderTable(ctx) {
     if (row.date === state.selectedDate) tr.classList.add("is-today");
 
     tr.innerHTML = `
-      <td><input type="checkbox" ${row.done ? "checked" : ""} aria-label="Done ${row.date}"></td>
-      <td><strong>${formatDate(row.date)}</strong><br><span class="muted-block">W${row.week}</span></td>
-      <td><strong>${row.distance_km || 0}</strong></td>
-      <td>${row.type}</td>
-      <td>${row.session}<br><span class="muted-block">${row.coach_note || ""}</span></td>
-      <td>${row.duration}</td>
-      <td>${row.equipment}</td>
-      <td>${row.fuel}</td>
+      <td data-label="Done"><input type="checkbox" ${row.done ? "checked" : ""} aria-label="Done ${row.date}"></td>
+      <td data-label="Date"><strong>${formatDate(row.date)}</strong><br><span class="muted-block">Week ${row.week} · ${row.phase || ""}</span></td>
+      <td data-label="Distance"><strong>${row.distance_km || 0}</strong> km${row.done && row.completed_km != null ? `<br><span class="muted-block">did ${row.completed_km}</span>` : ""}</td>
+      <td data-label="Type">${row.type}</td>
+      <td data-label="Session">${row.session}<br><span class="muted-block">${row.coach_note || ""}</span></td>
+      <td data-label="Time">${row.duration || "-"}</td>
+      <td data-label="Kit">${row.equipment || "-"}</td>
+      <td data-label="Fuel">${row.fuel || "-"}</td>
     `;
 
     tr.querySelector("input").addEventListener("change", (event) => {
