@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Coach to Client - 100 km</title>
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="styles.css?v=planner-3">
+    <link rel="stylesheet" href="styles.css?v=planner-4">
   </head>
   <body>
     <div class="app-shell">
@@ -76,9 +76,13 @@
         <div class="view-panel" data-view-panel="calendar">
           <section class="calendar-panel">
             <div class="calendar-head">
-              <div>
-                <p class="kicker">Week <span id="briefWeek"></span></p>
-                <h3 id="briefFocus">Loading plan</h3>
+              <div class="week-nav">
+                <button id="prevWeek" type="button" aria-label="Previous week">&#9664;</button>
+                <div>
+                  <p class="kicker">Week <span id="briefWeek"></span></p>
+                  <h3 id="briefFocus">Loading plan</h3>
+                </div>
+                <button id="nextWeek" type="button" aria-label="Next week">&#9654;</button>
               </div>
               <input id="searchInput" type="search" placeholder="Search sessions">
             </div>
@@ -180,6 +184,6 @@
       </aside>
     </div>
 
-    <script src="app.js?v=planner-3"></script>
+    <script src="app.js?v=planner-4"></script>
   </body>
 </html>

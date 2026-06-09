@@ -617,6 +617,38 @@ td:nth-child(1) {
   width: 56px;
 }
 
+.week-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.week-nav > div {
+  min-width: 0;
+}
+
+.week-nav button {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ink, #1c2330);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.week-nav button:hover:not(:disabled) {
+  border-color: var(--muted);
+}
+
+.week-nav button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 .side-footer {
   margin-top: auto;
   display: flex;
