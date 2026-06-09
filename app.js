@@ -10,6 +10,8 @@ const state = {
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 const datePicker = $("#datePicker");
+const prevWeek = $("#prevWeek");
+const nextWeek = $("#nextWeek");
 const searchInput = $("#searchInput");
 const planBody = $("#planBody");
 const calendarGrid = $("#calendarGrid");
@@ -77,6 +79,33 @@ function weekBounds() {
 function isoFromDate(date) {
   const offset = date.getTimezoneOffset();
   return new Date(date.getTime() - offset * 60000).toISOString().slice(0, 10);
+}
+
+function planBounds() {
+  return { min: state.plan[0].date, max: state.plan[state.plan.length - 1].date };
+}
+
+// Step the selected date by whole weeks, clamped to the plan's first/last day.
+function shiftWeek(deltaDays) {
+  if (!state.plan.length) return;
+  const base = new Date(`${state.selectedDate}T12:00:00`);
+  base.setDate(base.getDate() + deltaDays);
+  let iso = isoFromDate(base);
+  const { min, max } = planBounds();
+  if (iso < min) iso = min;
+  if (iso > max) iso = max;
+  state.selectedDate = iso;
+  state.mode = "week";
+  datePicker.value = iso;
+  render();
+}
+
+function renderWeekNav() {
+  if (!prevWeek || !nextWeek || !state.plan.length) return;
+  const weeks = state.plan.map((row) => Number(row.week));
+  const current = Number(selectedRow().week);
+  prevWeek.disabled = current <= Math.min(...weeks);
+  nextWeek.disabled = current >= Math.max(...weeks);
 }
 
 function rowsForMode() {
@@ -406,6 +435,7 @@ async function renderWeekBriefing() {
 
 function render() {
   renderViewPanels();
+  renderWeekNav();
   renderToday();
   renderCalendar();
   renderTable();
@@ -421,6 +451,9 @@ datePicker.addEventListener("change", () => {
   state.mode = "week";
   render();
 });
+
+prevWeek.addEventListener("click", () => shiftWeek(-7));
+nextWeek.addEventListener("click", () => shiftWeek(7));
 
 $("#todayButton").addEventListener("click", () => {
   state.selectedDate = todayIso();
