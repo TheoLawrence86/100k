@@ -20,13 +20,13 @@ COACH = {
     "title": "Ultra-endurance & multi-day event specialist",
     "bio": (
         "Twenty years coaching athletes through 100 km and multi-day continuous "
-        "events — Thames Path, canal-path ultras, and overnight challenges. My job "
+        "events: Thames Path, canal-path ultras, and overnight challenges. My job "
         "is to get the miles into your legs safely and on schedule, so race day is "
         "just a longer version of training you have already done."
     ),
     "philosophy": (
         "Easy means easy enough to talk. Long sessions are for feet, food, kit, and "
-        "patience — not pace. We build time-on-feet progressively, rehearse fuelling "
+        "patience, not pace. We build time-on-feet progressively, rehearse fuelling "
         "(30-60 g carbs/hour) and night kit, and taper volume without going soft. "
         "We never chase missed kilometres into the next week. Consistency beats heroics."
     ),
@@ -34,7 +34,7 @@ COACH = {
 
 CLIENT = {
     "name": "Grant",
-    "event": "Thames Path Ultra Challenge — Full Continuous 100 km",
+    "event": "Thames Path Ultra Challenge, Full Continuous 100 km",
     "event_date": "2026-09-12",
     "start_date": "2026-06-08",
     "target": "Finish comfortably; avoid foot, fuelling, pacing, and logistics failures.",
@@ -48,7 +48,7 @@ WEEK_BRIEFINGS = {
         "Welcome week. We establish a baseline and finish every session fresh. "
         "Keep everything conversational and start dialling in shoes and socks."),
     2: (38, "First fuelling practice",
-        "We add a little volume and start eating on the long session — practise "
+        "We add a little volume and start eating on the long session. Practise "
         "30 g carbs/hour. This is where fuelling stops being an afterthought."),
     3: (45, "Build the long run toward 20 km",
         "Long session grows toward 20 km. Relaxed rhythm, feet first. Note which "
@@ -63,13 +63,13 @@ WEEK_BRIEFINGS = {
         "Specific endurance build begins. Long session out to ~26 km. Keep eating "
         "every 30-45 minutes and drinking before thirst."),
     7: (68, "30 km long run + tired legs",
-        "Back-to-back weekend so you learn to start tired — that is event day in "
+        "Back-to-back weekend so you learn to start tired. That is event day in "
         "miniature. Long session ~30 km, easy run the day after."),
     8: (50, "Cutback + night kit",
         "Recover, then start testing night kit: head torch, backup light, layers, "
         "charging. Finish at least one session in the dark."),
     9: (76, "Full-kit long run",
-        "Peak specificity. Long session in full event kit — vest, bottles, lights. "
+        "Peak specificity. Long session in full event kit: vest, bottles, lights. "
         "Make it as event-like as possible."),
     10: (84, "38 km long run + reset rehearsal",
          "Big long run to ~38 km and a rehearsal of the Runnymede 50 km reset: food, "
@@ -83,10 +83,10 @@ WEEK_BRIEFINGS = {
     13: (38, "Taper 2, stay fresh",
          "Stay fresh. Prioritise sleep, foot health, and nutrition consistency. "
          "Pack early and check against the official kit list."),
-    14: (113, "Race week — includes the 100 km event",
+    14: (113, "Race week, includes the 100 km event",
          "Race week. Short, easy, sharp. Charge devices, pack early. On Saturday: "
          "start easier than feels necessary, treat the night as a planned phase, and "
-         "reset — don't finish — at Runnymede 50 km."),
+         "reset, don't finish, at Runnymede 50 km."),
 }
 
 

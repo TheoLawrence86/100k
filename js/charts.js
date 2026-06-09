@@ -16,22 +16,27 @@ export const TYPE_COLOURS = {
 /* Seven day bars for the dashboard "this week" tile. */
 export function weekMiniBars(rows, typeKeyOf) {
   const W = 220;
-  const H = 56;
+  const H = 78;
+  const base = H - 20;      // bars rest on this baseline
+  const maxH = base - 8;    // headroom above the tallest bar
   const max = Math.max(...rows.map((r) => r.distance_km || 0), 1);
-  const bw = W / 7 - 6;
+  const slot = W / 7;
+  const bw = slot - 12;
   const bars = rows
     .map((row, i) => {
       const km = row.distance_km || 0;
-      const h = km > 0 ? Math.max(6, (km / max) * (H - 14)) : 4;
-      const x = i * (W / 7) + 3;
+      const h = km > 0 ? Math.max(6, (km / max) * maxH) : 2.5;
+      const x = i * slot + (slot - bw) / 2;
+      const cx = i * slot + slot / 2;
       const colour = TYPE_COLOURS[typeKeyOf(row)];
-      const opacity = row.done ? 1 : 0.35;
-      return `<rect x="${x}" y="${H - h - 12}" width="${bw}" height="${h}" rx="3"
+      const opacity = row.done ? 1 : 0.4;
+      return `<rect x="${x.toFixed(1)}" y="${(base - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="2"
         fill="${colour}" opacity="${opacity}"><title>${esc(row.date)}: ${km} km${row.done ? " (done)" : ""}</title></rect>
-        <text x="${x + bw / 2}" y="${H - 1}" text-anchor="middle">${"MTWTFSS"[i]}</text>`;
+        <text x="${cx.toFixed(1)}" y="${H - 4}" text-anchor="middle">${"MTWTFSS"[i]}</text>`;
     })
     .join("");
-  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${bars}</svg>`;
+  const baseline = `<line class="axis" x1="1" y1="${base + 0.5}" x2="${W - 1}" y2="${base + 0.5}"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${bars}${baseline}</svg>`;
 }
 
 /* Small acute-load sparkline for the freshness tile. */
@@ -140,7 +145,7 @@ export function loadChart(series) {
   const maxRatio = 2;
   const pts = series.filter((s) => s.ratio !== null);
   if (pts.length < 2) {
-    return `<p class="muted-block" style="padding:4px 0 10px">Not enough logged sessions yet — the load ratio appears once a week or two of training is in the legs.</p>`;
+    return `<p class="muted-block" style="padding:4px 0 10px">Not enough logged sessions yet. The load ratio appears once a week or two of training is in the legs.</p>`;
   }
   const n = series.length;
   const x = (i) => pad.l + (i / (n - 1)) * innerW;
@@ -193,8 +198,8 @@ export function renderRouteMap(el, fraction) {
     dot.setAttribute("cx", p.x);
     dot.setAttribute("cy", p.y);
     dot.setAttribute("r", 5);
-    dot.setAttribute("fill", reached ? "var(--accent)" : "var(--line)");
-    dot.setAttribute("stroke", "var(--surface)");
+    dot.setAttribute("fill", reached ? "var(--accent)" : "var(--rule)");
+    dot.setAttribute("stroke", "var(--paper)");
     dot.setAttribute("stroke-width", 2);
     const label = document.createElementNS(ns, "text");
     label.setAttribute("x", p.x);
@@ -211,7 +216,7 @@ export function renderRouteMap(el, fraction) {
   marker.setAttribute("cy", m.y);
   marker.setAttribute("r", 8);
   marker.setAttribute("fill", "var(--accent)");
-  marker.setAttribute("stroke", "var(--surface)");
+  marker.setAttribute("stroke", "var(--paper)");
   marker.setAttribute("stroke-width", 3);
   svg.append(marker);
 }
