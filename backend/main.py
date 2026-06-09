@@ -5,6 +5,7 @@ root as static files so ``index.html`` / ``app.js`` / ``styles.css`` load
 from the same origin (no CORS, no second server).
 """
 
+import os
 from datetime import date, datetime, timedelta
 
 from fastapi import FastAPI, HTTPException
@@ -17,11 +18,20 @@ from .seed import seed
 
 app = FastAPI(title="Coach to Client — 100 km")
 
+# Baked into the image at build time (Dockerfile ARG GIT_SHA); "dev" locally.
+APP_VERSION = os.environ.get("APP_VERSION", "dev")
+
 
 @app.on_event("startup")
 def _startup() -> None:
     init_schema()
     seed()
+
+
+@app.get("/api/version")
+def get_version():
+    """What's actually running — so a stale deploy is obvious at a glance."""
+    return {"version": APP_VERSION, "service": "coach-to-client-100k"}
 
 
 def _row(table_one_row: str):

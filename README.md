@@ -94,6 +94,7 @@ restart.
 - `GET /api/week/{week}` — week briefing + sessions + planned/completed km.
 - `POST /api/log/{date}` — upsert done / actual km / readiness / notes for a day.
 - `GET /api/progress` — the "miles in the legs" dashboard totals.
+- `GET /api/version` — the commit the running image was built from (`dev` locally); shown in the sidebar footer so a stale deploy is obvious.
 
 ## Immediate Next Actions
 

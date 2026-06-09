@@ -15,5 +15,10 @@ COPY index.html app.js styles.css ./
 # SQLite lives here; docker-compose mounts a volume over it so data persists.
 ENV DB_PATH=/app/dbdata/coach.db
 
+# Commit the image was built from, surfaced at /api/version. Defaults to "dev"
+# for local builds; CI passes the real git sha via --build-arg GIT_SHA=...
+ARG GIT_SHA=dev
+ENV APP_VERSION=${GIT_SHA}
+
 EXPOSE 8000
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
