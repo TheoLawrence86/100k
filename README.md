@@ -40,6 +40,22 @@ docker compose up --build
 Then open http://localhost:8000. The SQLite file lives on the `coach-db`
 named volume, so logged progress survives rebuilds and restarts.
 
+### Run from the published image (GHCR)
+
+Every push to `main` builds the image and publishes it to the GitHub
+Container Registry via [`.github/workflows/docker-publish.yml`](.github/workflows/docker-publish.yml).
+To run it on any box with Docker — no source checkout, no build:
+
+```bash
+docker compose -f docker-compose.ghcr.yml pull
+docker compose -f docker-compose.ghcr.yml up -d
+```
+
+Image: `ghcr.io/theolawrence86/100k:latest` (also tagged `:sha-<short>` per
+commit and `:1.2.3` for `v*` git tags). If the package is private, run
+`docker login ghcr.io` with a PAT that has `read:packages` first, or make the
+package public under the repo's **Packages** settings for unauthenticated pulls.
+
 ### Run locally for development
 
 ```bash
@@ -59,6 +75,9 @@ restart.
 - [backend/main.py](backend/main.py): FastAPI app — JSON API plus the static frontend.
 - [backend/db.py](backend/db.py): SQLite connection and schema.
 - [backend/seed.py](backend/seed.py): idempotent first-run seeding from the TSV and authored coaching content.
+- [Dockerfile](Dockerfile), [docker-compose.yml](docker-compose.yml): local build + run.
+- [docker-compose.ghcr.yml](docker-compose.ghcr.yml): run the prebuilt image straight from GHCR.
+- [.github/workflows/docker-publish.yml](.github/workflows/docker-publish.yml): CI that builds and pushes the image to GHCR.
 - [data/training-plan.tsv](data/training-plan.tsv): source-of-truth day-by-day plan (seeds the `sessions` table).
 - [docs/research.md](docs/research.md): official facts and source links.
 - [docs/full-continuous-plan.md](docs/full-continuous-plan.md): event-day operating plan for the 100 km continuous format.

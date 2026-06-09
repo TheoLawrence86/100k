@@ -1,6 +1,10 @@
 services:
   app:
     build: .
+    # Name the locally built image after the GHCR repo so `docker compose push`
+    # publishes it and `docker compose pull` fetches the same tag. Local
+    # `docker compose up --build` still builds from source.
+    image: ghcr.io/theolawrence86/100k:latest
     ports:
       - "8000:8000"
     environment:

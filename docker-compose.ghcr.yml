@@ -1,0 +1,21 @@
+# Run the published image straight from GHCR — no source checkout, no local build.
+# Useful for deploying on a server / box that only has Docker.
+#
+#   docker compose -f docker-compose.ghcr.yml pull
+#   docker compose -f docker-compose.ghcr.yml up -d
+#
+# If the GHCR package is private, authenticate first:
+#   echo <PAT-with-read:packages> | docker login ghcr.io -u TheoLawrence86 --password-stdin
+services:
+  app:
+    image: ghcr.io/theolawrence86/100k:latest
+    ports:
+      - "8000:8000"
+    environment:
+      DB_PATH: /app/dbdata/coach.db
+    volumes:
+      - coach-db:/app/dbdata
+    restart: unless-stopped
+
+volumes:
+  coach-db:
