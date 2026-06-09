@@ -15,6 +15,8 @@ env:
   REGISTRY: ghcr.io
   # Must be lowercase for GHCR (the GitHub owner is TheoLawrence86).
   IMAGE_NAME: theolawrence86/100k
+  # Run JS actions on Node 24 (Node 20 is deprecated on GitHub runners).
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   build-and-push:
@@ -52,6 +54,8 @@ jobs:
         with:
           context: .
           push: true
+          build-args: |
+            GIT_SHA=${{ github.sha }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha

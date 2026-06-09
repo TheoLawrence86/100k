@@ -1,6 +1,10 @@
 services:
   app:
-    build: .
+    build:
+      context: .
+      args:
+        # Override locally with `GIT_SHA=$(git rev-parse --short HEAD) docker compose up --build`.
+        GIT_SHA: ${GIT_SHA:-dev}
     # Name the locally built image after the GHCR repo so `docker compose push`
     # publishes it and `docker compose pull` fetches the same tag. Local
     # `docker compose up --build` still builds from source.

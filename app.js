@@ -497,9 +497,21 @@ async function boot() {
 
     render();
     refreshProgress();
+    showVersion();
   } catch (err) {
     $("#todayTitle").textContent = "Cannot reach the coach";
     $("#todayMeta").textContent = "Start the app: docker compose up --build (or uvicorn backend.main:app)";
+  }
+}
+
+async function showVersion() {
+  const el = $("#appVersion");
+  if (!el) return;
+  try {
+    const { version } = await api("/version");
+    el.textContent = version === "dev" ? "dev" : version.slice(0, 7);
+  } catch {
+    el.textContent = "?";
   }
 }
 

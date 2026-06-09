@@ -13,3 +13,6 @@ __pycache__/
 *.db
 data/coach.db
 
+# Local screenshots / scratch output
+artifacts/
+
