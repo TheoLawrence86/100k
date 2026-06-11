@@ -5,7 +5,12 @@ root as static files so ``index.html`` / ``app.js`` / ``styles.css`` load
 from the same origin (no CORS, no second server).
 """
 
+import json
+import math
 import os
+import random
+import urllib.error
+import urllib.request
 from contextlib import asynccontextmanager
 from datetime import date, datetime, timedelta
 
@@ -370,6 +375,89 @@ def get_brief(for_date: str | None = None):
         "acute_km": load["acute_km"],
         "chronic_weekly_km": load["chronic_weekly_km"],
         "text": " ".join(parts),
+    }
+
+
+# ---------- loop route generator ----------
+#
+# Builds a runnable loop from the athlete's location: waypoints are placed on
+# a circle through the start point, snapped to real footpaths by the public
+# OSRM foot profile (FOSSGIS / routing.openstreetmap.de), and the circle
+# radius is re-scaled until the routed distance lands on the target.
+
+OSRM_FOOT = "https://routing.openstreetmap.de/routed-foot/route/v1/foot/"
+EARTH_RADIUS_M = 6_371_000
+
+
+def _offset(lat: float, lon: float, dist_m: float, bearing_rad: float):
+    dlat = dist_m * math.cos(bearing_rad) / EARTH_RADIUS_M
+    dlon = dist_m * math.sin(bearing_rad) / (
+        EARTH_RADIUS_M * math.cos(math.radians(lat))
+    )
+    return lat + math.degrees(dlat), lon + math.degrees(dlon)
+
+
+def _osrm_loop(points: list[tuple[float, float]]) -> tuple[float, list]:
+    coords = ";".join(f"{lon:.6f},{lat:.6f}" for lat, lon in points)
+    url = f"{OSRM_FOOT}{coords}?overview=full&geometries=geojson&continue_straight=true"
+    req = urllib.request.Request(url, headers={"User-Agent": "coach-to-client-100k"})
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            data = json.load(resp)
+    except urllib.error.HTTPError as exc:
+        raise HTTPException(502, f"routing service refused (HTTP {exc.code})") from exc
+    except (urllib.error.URLError, TimeoutError) as exc:
+        raise HTTPException(502, f"routing service unreachable: {exc}") from exc
+    if data.get("code") != "Ok" or not data.get("routes"):
+        raise HTTPException(502, "routing service could not build a route here")
+    route = data["routes"][0]
+    # GeoJSON is [lon, lat]; flip to [lat, lon] for the frontend.
+    return route["distance"], [[c[1], c[0]] for c in route["geometry"]["coordinates"]]
+
+
+def _loop_waypoints(lat: float, lon: float, radius_m: float, bearing: float):
+    """A ring of waypoints through (lat, lon): the circle's centre sits at
+    `radius_m` along `bearing`, so the start is always on the circle."""
+    centre = _offset(lat, lon, radius_m, bearing)
+    back = bearing + math.pi  # angle from centre back to the start
+    n = 6
+    points = [(lat, lon)]
+    for i in range(1, n):
+        points.append(_offset(*centre, radius_m, back + 2 * math.pi * i / n))
+    points.append((lat, lon))
+    return points
+
+
+@app.get("/api/route")
+def get_route(lat: float, lon: float, km: float, seed: int = 0):
+    """Generate a loop run of roughly `km` starting and ending at (lat, lon).
+    Different `seed` values send the loop off in a different direction."""
+    if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+        raise HTTPException(400, "bad coordinates")
+    km = max(1.0, min(km, 60.0))
+    target_m = km * 1000
+
+    bearing = random.Random(seed).uniform(0, 2 * math.pi)
+    # Footpaths wiggle, so the routed loop runs longer than the circle's
+    # circumference; start a touch small and calibrate.
+    radius = target_m / (2 * math.pi) * 0.85
+    best = None
+    for _ in range(4):
+        distance, coords = _osrm_loop(_loop_waypoints(lat, lon, radius, bearing))
+        if best is None or abs(distance - target_m) < abs(best[0] - target_m):
+            best = (distance, coords)
+        error = distance / target_m
+        if 0.93 <= error <= 1.07:
+            break
+        radius *= max(0.5, min(2.0, 1 / error))
+
+    distance, coords = best
+    return {
+        "target_km": round(km, 1),
+        "actual_km": round(distance / 1000, 1),
+        "coords": coords,
+        "start": [lat, lon],
+        "seed": seed,
     }
 
 

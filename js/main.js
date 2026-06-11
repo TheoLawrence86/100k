@@ -10,6 +10,7 @@ import {
   renderProgress,
   renderKit,
 } from "./views.js";
+import { renderRoute, wireRouteView } from "./route.js";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -20,6 +21,7 @@ function render() {
   if (state.view === "dashboard") renderDashboard();
   if (state.view === "calendar") renderCalendar(ctx);
   if (state.view === "plan") renderTable(ctx);
+  if (state.view === "route") renderRoute();
   if (state.view === "progress") renderProgress();
   if (state.view === "kit") renderKit(ctx);
 }
@@ -132,7 +134,7 @@ function saveSelectedDebounced() {
 
 /* ---------- router ---------- */
 
-const VIEWS = new Set(["dashboard", "calendar", "plan", "progress", "kit"]);
+const VIEWS = new Set(["dashboard", "calendar", "plan", "route", "progress", "kit"]);
 
 function applyRoute() {
   const name = (location.hash.replace(/^#\//, "") || "dashboard").split("?")[0];
@@ -189,6 +191,8 @@ $("#readinessSelect").addEventListener("change", saveSelected);
 $("#noteBox").addEventListener("input", saveSelectedDebounced);
 
 $("#themeToggle").addEventListener("click", toggleTheme);
+
+wireRouteView();
 
 window.addEventListener("hashchange", applyRoute);
 

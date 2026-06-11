@@ -489,6 +489,45 @@ td input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accen
 }
 .coach-card p { margin-top: 8px; max-width: 64ch; font-size: 13.5px; line-height: 1.55; }
 
+/* ---------- route view ---------- */
+
+.route-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+  margin: 14px 0 10px;
+}
+.route-controls label {
+  display: grid;
+  gap: 4px;
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.route-controls input { width: 90px; }
+.route-actual { margin-left: auto; color: var(--ink-soft); font-size: 13.5px; }
+.route-actual b { color: var(--ink); font-family: "Zodiak", Georgia, serif; font-size: 18px; }
+
+.route-status { margin-bottom: 12px; color: var(--ink-soft); font-size: 13.5px; }
+.route-status.red { color: var(--red); }
+
+#routeDrop.armed { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+.loop-map {
+  height: min(62vh, 560px);
+  border: 1px solid var(--rule-strong);
+  border-radius: 3px;
+  background: var(--paper-2);
+}
+.loop-map .leaflet-tile { filter: grayscale(0.25) sepia(0.12); }
+[data-theme="dark"] .loop-map .leaflet-tile {
+  filter: invert(1) hue-rotate(180deg) grayscale(0.3) brightness(0.85);
+}
+.loop-map .leaflet-container { font: inherit; }
+
 /* ---------- mobile tab bar ---------- */
 
 .tabbar {
