@@ -9,6 +9,7 @@ import json
 import math
 import os
 import random
+import time
 import urllib.error
 import urllib.request
 from contextlib import asynccontextmanager
@@ -401,13 +402,18 @@ def _osrm_loop(points: list[tuple[float, float]]) -> tuple[float, list]:
     coords = ";".join(f"{lon:.6f},{lat:.6f}" for lat, lon in points)
     url = f"{OSRM_FOOT}{coords}?overview=full&geometries=geojson&continue_straight=true"
     req = urllib.request.Request(url, headers={"User-Agent": "coach-to-client-100k"})
-    try:
-        with urllib.request.urlopen(req, timeout=20) as resp:
-            data = json.load(resp)
-    except urllib.error.HTTPError as exc:
-        raise HTTPException(502, f"routing service refused (HTTP {exc.code})") from exc
-    except (urllib.error.URLError, TimeoutError) as exc:
-        raise HTTPException(502, f"routing service unreachable: {exc}") from exc
+    data = None
+    for attempt in (1, 2):  # the public server drops connections now and then
+        try:
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                data = json.load(resp)
+            break
+        except urllib.error.HTTPError as exc:
+            raise HTTPException(502, f"routing service refused (HTTP {exc.code})") from exc
+        except (urllib.error.URLError, TimeoutError) as exc:
+            if attempt == 2:
+                raise HTTPException(502, f"routing service unreachable: {exc}") from exc
+            time.sleep(0.5)
     if data.get("code") != "Ok" or not data.get("routes"):
         raise HTTPException(502, "routing service could not build a route here")
     route = data["routes"][0]

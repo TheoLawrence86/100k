@@ -522,11 +522,22 @@ td input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accen
   border-radius: 3px;
   background: var(--paper-2);
 }
-.loop-map .leaflet-tile { filter: grayscale(0.25) sepia(0.12); }
-[data-theme="dark"] .loop-map .leaflet-tile {
-  filter: invert(1) hue-rotate(180deg) grayscale(0.3) brightness(0.85);
+.loop-map .maplibregl-ctrl-attrib {
+  background: color-mix(in srgb, var(--paper) 82%, transparent);
+  font-family: inherit;
+  font-size: 10.5px;
 }
-.loop-map .leaflet-container { font: inherit; }
+.loop-map .maplibregl-ctrl-attrib a { color: var(--ink-soft); }
+.loop-map .maplibregl-ctrl-group {
+  border: 1px solid var(--rule-strong);
+  border-radius: 3px;
+  background: var(--paper);
+  box-shadow: none;
+}
+.loop-map .maplibregl-ctrl-group button { background: var(--paper); }
+.loop-map .maplibregl-ctrl-group button + button { border-top: 1px solid var(--rule); }
+.loop-map .maplibregl-ctrl button .maplibregl-ctrl-icon { filter: none; }
+[data-theme="dark"] .loop-map .maplibregl-ctrl button .maplibregl-ctrl-icon { filter: invert(1) hue-rotate(180deg); }
 
 /* ---------- mobile tab bar ---------- */
 

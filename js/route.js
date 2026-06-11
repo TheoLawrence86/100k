@@ -1,20 +1,21 @@
 import { api } from "./api.js";
 import { state, selectedRow, rowDistance, formatDate } from "./state.js";
+import { buildMapStyle } from "./mapstyle.js";
 
 const $ = (sel) => document.querySelector(sel);
 
-/* Module state for the route view: the Leaflet map survives view switches,
+/* Module state for the route view: the MapLibre map survives view switches,
    the last plotted route feeds the GPX download. */
 let map = null;
-let routeLayer = null;
 let startMarker = null;
 let lastRoute = null;
+let mapTheme = null;
 let seed = 0;
 let busy = false;
 
-/* Manual start: set by dragging the pin. Browsers without GPS often only
-   know the town (or the ISP's city), so a bad fix only needs correcting
-   once — the pinned start is remembered across visits. */
+/* Manual start: set by dragging the pin or dropping it on the map. Browsers
+   without GPS often only know the town (or the ISP's city), so a bad fix
+   only needs correcting once — the start is remembered across visits. */
 let pinnedStart = null;
 try {
   pinnedStart = JSON.parse(localStorage.getItem("routeStart"));
@@ -36,35 +37,76 @@ function setStatus(text, tone = "") {
   el.className = `route-status ${tone}`.trim();
 }
 
+const cssVar = (name) =>
+  getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+const currentTheme = () =>
+  document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+
+function routeGeojson() {
+  return {
+    type: "Feature",
+    properties: {},
+    geometry: {
+      type: "LineString",
+      // API sends [lat, lon]; MapLibre wants [lng, lat].
+      coordinates: lastRoute ? lastRoute.coords.map(([lat, lon]) => [lon, lat]) : [],
+    },
+  };
+}
+
+/* setStyle wipes sources and layers, so the route is re-added on every
+   style.load — initial load and theme swaps alike. */
+function addRouteLayers() {
+  if (map.getSource("route")) return;
+  map.addSource("route", { type: "geojson", data: routeGeojson() });
+  map.addLayer({
+    id: "route-casing", type: "line", source: "route",
+    layout: { "line-cap": "round", "line-join": "round" },
+    paint: { "line-color": cssVar("--ink"), "line-width": 7, "line-opacity": 0.25 },
+  });
+  map.addLayer({
+    id: "route-line", type: "line", source: "route",
+    layout: { "line-cap": "round", "line-join": "round" },
+    paint: { "line-color": cssVar("--accent"), "line-width": 3.5 },
+  });
+}
+
 function ensureMap() {
-  if (map) return map;
-  map = L.map("loopMap", { zoomControl: true, attributionControl: true });
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-  }).addTo(map);
-  if (pinnedStart) {
-    map.setView([pinnedStart.lat, pinnedStart.lon], 14);
-  } else {
-    map.setView([52.5, -1.5], 6); // Britain, until we know better
+  if (map) {
+    if (mapTheme !== currentTheme()) {
+      mapTheme = currentTheme();
+      map.setStyle(buildMapStyle(mapTheme));
+    }
+    return map;
   }
+  mapTheme = currentTheme();
+  map = new maplibregl.Map({
+    container: "loopMap",
+    style: buildMapStyle(mapTheme),
+    center: pinnedStart ? [pinnedStart.lon, pinnedStart.lat] : [-1.5, 52.5],
+    zoom: pinnedStart ? 13 : 5.2,
+    attributionControl: { compact: true },
+  });
+  map.addControl(new maplibregl.NavigationControl({ showCompass: false }));
+  map.on("style.load", addRouteLayers);
   return map;
 }
 
 function setStartMarker(lat, lon) {
   const m = ensureMap();
   if (!startMarker) {
-    startMarker = L.marker([lat, lon], { draggable: true })
-      .addTo(m)
-      .bindTooltip("Start / finish — drag me if this isn't where you are");
+    startMarker = new maplibregl.Marker({ draggable: true, color: cssVar("--accent") })
+      .setLngLat([lon, lat])
+      .addTo(m);
     startMarker.on("dragend", () => {
-      const p = startMarker.getLatLng();
+      const p = startMarker.getLngLat();
       pinnedStart = { lat: p.lat, lon: p.lng };
       localStorage.setItem("routeStart", JSON.stringify(pinnedStart));
       generate();
     });
   } else {
-    startMarker.setLatLng([lat, lon]);
+    startMarker.setLngLat([lon, lat]);
   }
 }
 
@@ -90,14 +132,14 @@ function locate() {
 
 function drawRoute(route) {
   const m = ensureMap();
-  if (routeLayer) routeLayer.remove();
-  const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
-  const ink = getComputedStyle(document.documentElement).getPropertyValue("--ink").trim();
-  routeLayer = L.layerGroup([
-    L.polyline(route.coords, { color: ink, weight: 7, opacity: 0.25 }),
-    L.polyline(route.coords, { color: accent, weight: 3.5 }),
-  ]).addTo(m);
-  m.fitBounds(L.polyline(route.coords).getBounds(), { padding: [28, 28] });
+  const source = m.getSource("route");
+  if (source) source.setData(routeGeojson());
+  const lngs = route.coords.map(([, lon]) => lon);
+  const lats = route.coords.map(([lat]) => lat);
+  m.fitBounds(
+    [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
+    { padding: 36, duration: 700 }
+  );
 }
 
 function setBusy(value) {
@@ -127,7 +169,7 @@ async function generate() {
         note =
           `Heads-up: your browser only knows your position to about ` +
           `${Math.round(start.accuracy / 1000)} km, so the start may be off — ` +
-          `drag the pin to where you actually are and I'll replot.`;
+          `drag the pin (or “Drop pin on map”) and I'll replot.`;
       }
     }
     setStartMarker(start.lat, start.lon);
@@ -150,7 +192,7 @@ async function generate() {
       setStartMarker(centre.lat, centre.lng);
       setStatus(
         `Couldn't get your location (${err.message}). ` +
-          "Drag the pin to your start point and I'll plot from there.",
+          "Drag the pin to your start point (or use “Drop pin on map”) and I'll plot from there.",
         "red"
       );
     } else {
@@ -175,7 +217,7 @@ let dropArmed = false;
 
 function onDropClick(e) {
   disarmDropPin();
-  pinnedStart = { lat: e.latlng.lat, lon: e.latlng.lng };
+  pinnedStart = { lat: e.lngLat.lat, lon: e.lngLat.lng };
   localStorage.setItem("routeStart", JSON.stringify(pinnedStart));
   setStartMarker(pinnedStart.lat, pinnedStart.lon);
   generate();
@@ -187,7 +229,7 @@ function disarmDropPin() {
   $("#routeDrop").classList.remove("armed");
   const m = ensureMap();
   m.off("click", onDropClick);
-  m.getContainer().style.cursor = "";
+  m.getCanvas().style.cursor = "";
 }
 
 function toggleDropPin() {
@@ -200,7 +242,7 @@ function toggleDropPin() {
   $("#routeDrop").classList.add("armed");
   const m = ensureMap();
   m.once("click", onDropClick);
-  m.getContainer().style.cursor = "crosshair";
+  m.getCanvas().style.cursor = "crosshair";
   setStatus("Tap the map where your run starts — zoom and pan first if you need to.");
 }
 
@@ -247,9 +289,10 @@ export function renderRoute() {
     $("#routeNeed").textContent = "Nothing on the plan — pick your own distance.";
   }
 
-  // Leaflet measures its container, so wait until the view is visible.
+  // The map measures its container, so wait until the view is visible.
+  // ensureMap() also re-skins the basemap if the theme changed meanwhile.
   requestAnimationFrame(() => {
-    ensureMap().invalidateSize();
+    ensureMap().resize();
     // First visit to the view: simulate the run automatically.
     if (!lastRoute && !busy && kmInput.value) generate();
   });
