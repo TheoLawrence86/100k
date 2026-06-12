@@ -5,6 +5,7 @@ root as static files so ``index.html`` / ``app.js`` / ``styles.css`` load
 from the same origin (no CORS, no second server).
 """
 
+import base64
 import json
 import math
 import os
@@ -15,7 +16,7 @@ import urllib.request
 from contextlib import asynccontextmanager
 from datetime import date, datetime, timedelta
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -32,6 +33,48 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="Coach to Client: 100 km", lifespan=lifespan)
+
+# Authorisation on top of App Service Easy Auth. Easy Auth only checks that
+# the visitor *has* an account with a configured provider; with Google
+# enabled that's anyone on Earth, so the app must check *who* signed in.
+# Comma-separated emails; unset means open (local dev, no Easy Auth proxy).
+ALLOWED_EMAILS = {
+    e.strip().lower()
+    for e in os.environ.get("ALLOWED_EMAILS", "").split(",")
+    if e.strip()
+}
+
+
+def _principal_email(request: Request) -> str | None:
+    """Email from the X-MS-CLIENT-PRINCIPAL header Easy Auth injects."""
+    header = request.headers.get("x-ms-client-principal")
+    if not header:
+        return None
+    try:
+        principal = json.loads(base64.b64decode(header))
+    except (ValueError, json.JSONDecodeError):
+        return None
+    for claim in principal.get("claims", []):
+        if claim.get("typ") in (
+            "preferred_username",
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+            "email",
+        ):
+            return claim.get("val", "").lower()
+    return None
+
+
+@app.middleware("http")
+async def email_allowlist(request: Request, call_next):
+    if ALLOWED_EMAILS:
+        email = _principal_email(request)
+        if email not in ALLOWED_EMAILS:
+            return JSONResponse(
+                {"detail": f"Signed in as {email or 'unknown'}, "
+                           "but this account is not authorised."},
+                status_code=403,
+            )
+    return await call_next(request)
 
 # Baked into the image at build time (Dockerfile ARG GIT_SHA); "dev" locally.
 APP_VERSION = os.environ.get("APP_VERSION", "dev")
