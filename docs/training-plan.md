@@ -1,6 +1,6 @@
 # Full Continuous 100 km Training Plan
 
-This is a working 14-week plan from Monday 8 June 2026 to the Thames Path Ultra Challenge weekend on Saturday 12 September 2026.
+This is a working 14-week plan from Saturday 13 June 2026 to the Thames Path Ultra Challenge weekend on Saturday 12 September 2026. Week 1 is a two-day baseline weekend; full weekly rhythm starts Monday 15 June.
 
 It is intentionally conservative until current fitness, injury history, and target pace are known.
 
@@ -10,7 +10,7 @@ The live day-by-day plan is in `data/training-plan.tsv`. The local viewer is `in
 
 | Week | Dates | Target | Focus |
 | --- | --- | ---: | --- |
-| 1 | 8-14 Jun | 30 km | Baseline, shoes, easy rhythm |
+| 1 | 13-14 Jun | 14 km | Baseline weekend, shoes, easy rhythm |
 | 2 | 15-21 Jun | 38 km | First fuelling practice |
 | 3 | 22-28 Jun | 45 km | Build long run to 20 km |
 | 4 | 29 Jun-5 Jul | 52 km | Checkpoint routine starts |
@@ -54,7 +54,7 @@ The live day-by-day plan is in `data/training-plan.tsv`. The local viewer is `in
 
 ## Phase 1: Establish Baseline
 
-Weeks 1-3: 8 June to 28 June 2026.
+Weeks 1-3: 13 June to 28 June 2026.
 
 - Confirm current weekly mileage/time-on-feet.
 - Build consistency without chasing big numbers.
