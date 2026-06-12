@@ -246,7 +246,7 @@ function toggleDropPin() {
   setStatus("Tap the map where your run starts — zoom and pan first if you need to.");
 }
 
-function downloadGpx() {
+async function downloadGpx() {
   if (!lastRoute) return;
   const pts = lastRoute.coords
     .map(([lat, lon]) => `      <trkpt lat="${lat}" lon="${lon}"></trkpt>`)
@@ -260,11 +260,21 @@ ${pts}
     </trkseg>
   </trk>
 </gpx>`;
+  const name = `loop-${lastRoute.actual_km}km.gpx`;
+  // On the phone, the share sheet hands the GPX straight to a watch nav app
+  // (WorkOutDoors, Komoot, Footpath…) — no detour through the Files app.
+  const file = new File([gpx], name, { type: "application/gpx+xml" });
+  if (navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file] });
+      return;
+    } catch (err) {
+      if (err.name === "AbortError") return; // athlete closed the sheet
+      // Share failed for real — fall through to the plain download.
+    }
+  }
   const url = URL.createObjectURL(new Blob([gpx], { type: "application/gpx+xml" }));
-  const a = Object.assign(document.createElement("a"), {
-    href: url,
-    download: `loop-${lastRoute.actual_km}km.gpx`,
-  });
+  const a = Object.assign(document.createElement("a"), { href: url, download: name });
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -274,7 +284,10 @@ export function wireRouteView() {
   $("#routeReroll").addEventListener("click", () => { seed += 1; generate(); });
   $("#routeLocate").addEventListener("click", useMyLocation);
   $("#routeDrop").addEventListener("click", toggleDropPin);
-  $("#routeGpx").addEventListener("click", downloadGpx);
+  const gpxBtn = $("#routeGpx");
+  gpxBtn.addEventListener("click", downloadGpx);
+  const probe = new File([""], "probe.gpx", { type: "application/gpx+xml" });
+  if (navigator.canShare?.({ files: [probe] })) gpxBtn.textContent = "Send GPX to watch app";
 }
 
 export function renderRoute() {
