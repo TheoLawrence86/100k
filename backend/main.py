@@ -16,7 +16,7 @@ import urllib.request
 from contextlib import asynccontextmanager
 from datetime import date, datetime, timedelta
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -76,6 +76,22 @@ async def email_allowlist(request: Request, call_next):
             )
     return await call_next(request)
 
+
+def current_user_id(request: Request) -> int:
+    """The signed-in visitor's users.id, created on first sight.
+
+    Identity comes from the Easy Auth principal header; without it (local
+    dev, no proxy) everything maps to a fixed dev user. Each user's logs and
+    kit state are scoped to this id, so visitors never see each other's data.
+    """
+    email = _principal_email(request) or "dev@local"
+    with connect() as conn:
+        conn.execute("INSERT OR IGNORE INTO users (email) VALUES (?)", (email,))
+        return conn.execute(
+            "SELECT id FROM users WHERE email = ?", (email,)
+        ).fetchone()["id"]
+
+
 # Baked into the image at build time (Dockerfile ARG GIT_SHA); "dev" locally.
 APP_VERSION = os.environ.get("APP_VERSION", "dev")
 
@@ -119,14 +135,15 @@ def get_client():
     return client
 
 
-def _plan_rows(conn) -> list[dict]:
+def _plan_rows(conn, user_id: int) -> list[dict]:
     rows = conn.execute(
         """
         SELECT s.*, l.done, l.completed_km, l.readiness, l.notes
         FROM sessions s
-        LEFT JOIN session_log l ON l.date = s.date
+        LEFT JOIN session_log l ON l.date = s.date AND l.user_id = ?
         ORDER BY s.date
-        """
+        """,
+        (user_id,),
     ).fetchall()
     out = []
     for r in rows:
@@ -139,18 +156,18 @@ def _plan_rows(conn) -> list[dict]:
 
 
 @app.get("/api/plan")
-def get_plan():
+def get_plan(user_id: int = Depends(current_user_id)):
     with connect() as conn:
-        return _plan_rows(conn)
+        return _plan_rows(conn, user_id)
 
 
 @app.get("/api/week/{week}")
-def get_week(week: int):
+def get_week(week: int, user_id: int = Depends(current_user_id)):
     with connect() as conn:
         briefing = conn.execute(
             "SELECT * FROM week_briefings WHERE week = ?", (week,)
         ).fetchone()
-        sessions = [r for r in _plan_rows(conn) if r["week"] == week]
+        sessions = [r for r in _plan_rows(conn, user_id) if r["week"] == week]
     if not briefing:
         raise HTTPException(404, "no such week")
     planned = sum(s["distance_km"] or 0 for s in sessions)
@@ -175,7 +192,7 @@ class LogIn(BaseModel):
 
 
 @app.post("/api/log/{log_date}")
-def upsert_log(log_date: str, body: LogIn):
+def upsert_log(log_date: str, body: LogIn, user_id: int = Depends(current_user_id)):
     if body.readiness not in {"green", "yellow", "red"}:
         raise HTTPException(400, "readiness must be green, yellow, or red")
     with connect() as conn:
@@ -186,19 +203,21 @@ def upsert_log(log_date: str, body: LogIn):
             raise HTTPException(404, "no session on that date")
         conn.execute(
             """
-            INSERT INTO session_log (date, done, completed_km, readiness, notes, updated_at)
-            VALUES (?, ?, ?, ?, ?, datetime('now'))
-            ON CONFLICT(date) DO UPDATE SET
+            INSERT INTO session_log (user_id, date, done, completed_km, readiness, notes, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+            ON CONFLICT(user_id, date) DO UPDATE SET
                 done = excluded.done,
                 completed_km = excluded.completed_km,
                 readiness = excluded.readiness,
                 notes = excluded.notes,
                 updated_at = excluded.updated_at
             """,
-            (log_date, int(body.done), body.completed_km, body.readiness, body.notes),
+            (user_id, log_date, int(body.done), body.completed_km, body.readiness, body.notes),
         )
         row = conn.execute(
-            "SELECT * FROM session_log WHERE date = ?", (log_date,)
+            "SELECT date, done, completed_km, readiness, notes, updated_at "
+            "FROM session_log WHERE user_id = ? AND date = ?",
+            (user_id, log_date),
         ).fetchone()
     return dict(row)
 
@@ -212,10 +231,10 @@ def _completed_value(s: dict) -> float:
 
 
 @app.get("/api/progress")
-def get_progress():
+def get_progress(user_id: int = Depends(current_user_id)):
     today = date.today().isoformat()
     with connect() as conn:
-        plan = _plan_rows(conn)
+        plan = _plan_rows(conn, user_id)
 
     total_planned = sum(s["distance_km"] or 0 for s in plan)
     total_completed = sum(_completed_value(s) for s in plan)
@@ -288,12 +307,12 @@ def _load_at(done_km: dict[str, float], start: date, day: date) -> dict:
 
 
 @app.get("/api/load")
-def get_load():
+def get_load(user_id: int = Depends(current_user_id)):
     """Training-load model + chart series: daily acute/chronic ratio, weekly
     planned-vs-completed, and the cumulative plan-vs-actual lines."""
     today = date.today()
     with connect() as conn:
-        plan = _plan_rows(conn)
+        plan = _plan_rows(conn, user_id)
         briefings = {
             r["week"]: dict(r)
             for r in conn.execute("SELECT * FROM week_briefings").fetchall()
@@ -340,7 +359,7 @@ def get_load():
 
 
 @app.get("/api/brief")
-def get_brief(for_date: str | None = None):
+def get_brief(for_date: str | None = None, user_id: int = Depends(current_user_id)):
     """The coach's generated daily brief: readiness + load ratio + yesterday's
     log + the week focus, folded into one instruction (docs/adaptation-rules.md)."""
     try:
@@ -349,7 +368,7 @@ def get_brief(for_date: str | None = None):
         raise HTTPException(400, "for_date must be YYYY-MM-DD")
 
     with connect() as conn:
-        plan = _plan_rows(conn)
+        plan = _plan_rows(conn, user_id)
         briefing = conn.execute(
             "SELECT * FROM week_briefings WHERE week = "
             "(SELECT week FROM sessions WHERE date = ?)",
@@ -515,12 +534,23 @@ class KitIn(BaseModel):
     tested: bool | None = None
 
 
+def _kit_row(conn, user_id: int, item_id: int | None = None):
+    sql = """
+        SELECT k.id, k.label, k.category, k.sort,
+               COALESCE(s.checked, 0) AS checked,
+               COALESCE(s.tested, 0) AS tested
+        FROM kit_items k
+        LEFT JOIN kit_state s ON s.item_id = k.id AND s.user_id = ?
+    """
+    if item_id is not None:
+        return conn.execute(sql + " WHERE k.id = ?", (user_id, item_id)).fetchone()
+    return conn.execute(sql + " ORDER BY k.sort, k.id", (user_id,)).fetchall()
+
+
 @app.get("/api/kit")
-def get_kit():
+def get_kit(user_id: int = Depends(current_user_id)):
     with connect() as conn:
-        rows = conn.execute(
-            "SELECT * FROM kit_items ORDER BY sort, id"
-        ).fetchall()
+        rows = _kit_row(conn, user_id)
     return [
         {**dict(r), "checked": bool(r["checked"]), "tested": bool(r["tested"])}
         for r in rows
@@ -528,18 +558,24 @@ def get_kit():
 
 
 @app.post("/api/kit/{item_id}")
-def update_kit(item_id: int, body: KitIn):
+def update_kit(item_id: int, body: KitIn, user_id: int = Depends(current_user_id)):
     with connect() as conn:
-        row = conn.execute("SELECT * FROM kit_items WHERE id = ?", (item_id,)).fetchone()
+        row = _kit_row(conn, user_id, item_id)
         if not row:
             raise HTTPException(404, "no such kit item")
         checked = int(body.checked) if body.checked is not None else row["checked"]
         tested = int(body.tested) if body.tested is not None else row["tested"]
         conn.execute(
-            "UPDATE kit_items SET checked = ?, tested = ? WHERE id = ?",
-            (checked, tested, item_id),
+            """
+            INSERT INTO kit_state (user_id, item_id, checked, tested)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(user_id, item_id) DO UPDATE SET
+                checked = excluded.checked,
+                tested = excluded.tested
+            """,
+            (user_id, item_id, checked, tested),
         )
-        row = conn.execute("SELECT * FROM kit_items WHERE id = ?", (item_id,)).fetchone()
+        row = _kit_row(conn, user_id, item_id)
     return {**dict(row), "checked": bool(row["checked"]), "tested": bool(row["tested"])}
 
 
