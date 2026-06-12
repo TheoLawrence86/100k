@@ -36,7 +36,7 @@ CLIENT = {
     "name": "Grant",
     "event": "Thames Path Ultra Challenge, Full Continuous 100 km",
     "event_date": "2026-09-12",
-    "start_date": "2026-06-08",
+    "start_date": "2026-06-13",
     "target": "Finish comfortably; avoid foot, fuelling, pacing, and logistics failures.",
 }
 
@@ -44,9 +44,10 @@ CLIENT = {
 # docs/training-plan.md "Weekly Distance Targets"; briefings written in the
 # coach's voice from the phase notes and coaching rules.
 WEEK_BRIEFINGS = {
-    1: (30, "Baseline, shoes, easy rhythm",
-        "Welcome week. We establish a baseline and finish every session fresh. "
-        "Keep everything conversational and start dialling in shoes and socks."),
+    1: (14, "Baseline weekend, shoes, easy rhythm",
+        "Welcome weekend. Two days to establish a baseline and finish both sessions "
+        "fresh. Keep everything conversational and start dialling in shoes and socks. "
+        "The full weekly rhythm starts Monday."),
     2: (38, "First fuelling practice",
         "We add a little volume and start eating on the long session. Practise "
         "30 g carbs/hour. This is where fuelling stops being an afterthought."),
