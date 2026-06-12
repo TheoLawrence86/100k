@@ -1,11 +1,11 @@
 /* Network-first service worker: the app always prefers fresh data, but the
    shell keeps working offline (e.g. mid-trail with no signal). */
-const CACHE = "tpu-journal-4";
+const CACHE = "tpu-journal-6";
 const SHELL = [
   "/",
   "/index.html",
-  "/styles.css?v=journal-1",
-  "/js/main.js?v=journal-1",
+  "/styles.css?v=journal-3",
+  "/js/main.js?v=journal-3",
   "/assets/badge.png",
   "/assets/hero-thames.jpg",
   "/assets/runner.png",
@@ -13,6 +13,8 @@ const SHELL = [
   "/js/state.js",
   "/js/charts.js",
   "/js/views.js",
+  "/js/route.js",
+  "/js/mapstyle.js",
   "/manifest.webmanifest",
   "/assets/icon.svg",
 ];
@@ -33,6 +35,10 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  // API calls go straight to the network: caching them serves stale data,
+  // and a cache miss after a network error surfaces as a bare
+  // "Failed to fetch" that hides the real problem.
+  if (new URL(event.request.url).pathname.startsWith("/api/")) return;
   event.respondWith(
     // cache: "no-cache" revalidates with the server (ETag) so a new deploy
     // is picked up on the next load instead of being pinned by the HTTP cache.

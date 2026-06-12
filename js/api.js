@@ -1,6 +1,21 @@
 export async function api(path, options) {
-  const res = await fetch(`/api${path}`, options);
-  if (!res.ok) throw new Error(`${path} -> ${res.status}`);
+  let res;
+  try {
+    res = await fetch(`/api${path}`, options);
+  } catch (err) {
+    // A reused keep-alive socket the server already closed fails at the
+    // network level ("Failed to fetch"); a fresh connection fixes it.
+    if (options?.method && options.method !== "GET") throw err;
+    await new Promise((r) => setTimeout(r, 400));
+    res = await fetch(`/api${path}`, options);
+  }
+  if (!res.ok) {
+    let detail = "";
+    try {
+      detail = (await res.json()).detail || "";
+    } catch {}
+    throw new Error(`${path} -> ${res.status}${detail ? `: ${detail}` : ""}`);
+  }
   return res.json();
 }
 

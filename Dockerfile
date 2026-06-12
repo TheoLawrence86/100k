@@ -23,4 +23,6 @@ ARG GIT_SHA=dev
 ENV APP_VERSION=${GIT_SHA}
 
 EXPOSE 8000
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Long keep-alive: Chrome reuses pooled connections, and uvicorn's 5 s
+# default closes them mid-reuse, surfacing as "Failed to fetch" in the app.
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--timeout-keep-alive", "75"]

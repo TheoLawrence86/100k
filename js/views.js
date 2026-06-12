@@ -27,6 +27,7 @@ const VIEW_TITLES = {
   dashboard: ["The towpath journal", "Today"],
   calendar: ["Athlete plan", "Calendar"],
   plan: ["Athlete plan", "Training log"],
+  route: ["Run from your door", "Route"],
   progress: ["Miles in the legs", "Progress"],
   kit: ["Race day", "Kit checklist"],
 };
