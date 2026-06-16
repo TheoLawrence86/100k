@@ -15,7 +15,7 @@
     <link href="https://api.fontshare.com/v2/css?f[]=zodiak@400,401,700&f[]=supreme@400,401,500,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css"
       integrity="sha256-qx5w1Z7EBGW65+cDDaLzzPKBM/1QLmK9WY7vut/XpzI=" crossorigin="">
-    <link rel="stylesheet" href="styles.css?v=journal-3">
+    <link rel="stylesheet" href="styles.css?v=journal-4">
   </head>
   <body>
     <header class="masthead">
@@ -69,10 +69,14 @@
 
           <dl class="detail-row">
             <div><dt>Distance</dt><dd id="todayDistance">-</dd></div>
+            <div><dt>Pace</dt><dd id="todayPace">-</dd></div>
             <div><dt>Duration</dt><dd id="todayDuration">-</dd></div>
             <div><dt>Equipment</dt><dd id="todayEquipment">-</dd></div>
             <div><dt>Fuel</dt><dd id="todayFuel">-</dd></div>
           </dl>
+
+          <p class="pace-tether" id="todayPaceNote" hidden></p>
+          <div class="routines" id="todayRoutines" hidden></div>
 
           <div class="logger">
             <label class="check switch">
@@ -175,7 +179,7 @@
             <table>
               <thead>
                 <tr>
-                  <th>Done</th><th>Date</th><th>Distance</th><th>Type</th><th>Session</th><th>Time</th><th>Kit</th><th>Fuel</th>
+                  <th>Done</th><th>Date</th><th>Distance</th><th>Pace</th><th>Type</th><th>Session</th><th>Time</th><th>Kit</th><th>Fuel</th>
                 </tr>
               </thead>
               <tbody id="planBody"></tbody>
@@ -268,6 +272,6 @@
 
     <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"
       integrity="sha256-RamwepGJzlYFTGIKlHzPQeKR5YyV6bYVM7dAqqZe5cs=" crossorigin=""></script>
-    <script type="module" src="js/main.js?v=journal-3"></script>
+    <script type="module" src="js/main.js?v=journal-4"></script>
   </body>
 </html>

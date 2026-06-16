@@ -1,11 +1,11 @@
 /* Network-first service worker: the app always prefers fresh data, but the
    shell keeps working offline (e.g. mid-trail with no signal). */
-const CACHE = "tpu-journal-6";
+const CACHE = "tpu-journal-7";
 const SHELL = [
   "/",
   "/index.html",
-  "/styles.css?v=journal-3",
-  "/js/main.js?v=journal-3",
+  "/styles.css?v=journal-4",
+  "/js/main.js?v=journal-4",
   "/assets/badge.png",
   "/assets/hero-thames.jpg",
   "/assets/runner.png",
