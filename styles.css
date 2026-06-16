@@ -257,6 +257,23 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   text-transform: uppercase;
   margin-bottom: 6px;
 }
+.pace-plan {
+  list-style: none;
+  display: grid;
+  gap: 5px;
+  margin-top: 12px;
+  padding: 12px 0 0 14px;
+  border-top: 1px solid var(--rule);
+}
+.pace-plan li {
+  position: relative;
+  padding-left: 14px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.pace-plan li::before { content: "›"; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+
 .routine ul { list-style: none; display: grid; gap: 4px; }
 .routine li {
   position: relative;

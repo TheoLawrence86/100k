@@ -26,6 +26,16 @@ const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 // Short pace label for tight spaces (table/calendar): just the band, no prose.
 const paceLabel = (row) => (row.pace ? row.pace.range : "");
 
+// The event's goal-time pacing plan as a small bulleted block ("" when absent).
+function pacePlanHTML(row) {
+  if (!row.pace?.plan?.length) return "";
+  return (
+    `<div class="routine"><p class="routine-head">20-hour pacing plan</p><ul>` +
+    row.pace.plan.map((p) => `<li>${p}</li>`).join("") +
+    `</ul></div>`
+  );
+}
+
 // Strength + stretch routines as a small bulleted block. Returns "" when the
 // session has neither, so callers can skip rendering entirely.
 function routinesHTML(row) {
@@ -99,6 +109,12 @@ export function renderDashboard() {
   const paceNote = $("#todayPaceNote");
   paceNote.textContent = row.pace ? row.pace.note : "";
   paceNote.hidden = !row.pace;
+
+  const pacePlan = $("#todayPacePlan");
+  pacePlan.innerHTML = row.pace?.plan?.length
+    ? row.pace.plan.map((p) => `<li>${p}</li>`).join("")
+    : "";
+  pacePlan.hidden = !pacePlan.innerHTML;
 
   const routines = $("#todayRoutines");
   routines.innerHTML = routinesHTML(row);
@@ -293,7 +309,7 @@ export function renderTable(ctx) {
       <td data-label="Distance"><strong>${row.distance_km || 0}</strong> km${row.done && row.completed_km != null ? `<br><span class="muted-block">did ${row.completed_km}</span>` : ""}</td>
       <td data-label="Pace">${paceLabel(row) || "-"}</td>
       <td data-label="Type">${row.type}</td>
-      <td data-label="Session">${row.session}<br><span class="muted-block">${row.coach_note || ""}</span>${routinesHTML(row)}</td>
+      <td data-label="Session">${row.session}<br><span class="muted-block">${row.coach_note || ""}</span>${pacePlanHTML(row)}${routinesHTML(row)}</td>
       <td data-label="Time">${row.duration || "-"}</td>
       <td data-label="Kit">${row.equipment || "-"}</td>
       <td data-label="Fuel">${row.fuel || "-"}</td>
