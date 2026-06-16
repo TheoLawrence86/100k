@@ -23,6 +23,30 @@ import {
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
+// Short pace label for tight spaces (table/calendar): just the band, no prose.
+const paceLabel = (row) => (row.pace ? row.pace.range : "");
+
+// Strength + stretch routines as a small bulleted block. Returns "" when the
+// session has neither, so callers can skip rendering entirely.
+function routinesHTML(row) {
+  const blocks = [];
+  if (row.strength?.length) {
+    blocks.push(
+      `<div class="routine"><p class="routine-head">Strength</p><ul>` +
+        row.strength.map((m) => `<li>${m}</li>`).join("") +
+        `</ul></div>`,
+    );
+  }
+  if (row.mobility?.length) {
+    blocks.push(
+      `<div class="routine"><p class="routine-head">Stretch &amp; mobility</p><ul>` +
+        row.mobility.map((m) => `<li>${m}</li>`).join("") +
+        `</ul></div>`,
+    );
+  }
+  return blocks.join("");
+}
+
 const VIEW_TITLES = {
   dashboard: ["The towpath journal", "Today"],
   calendar: ["Athlete plan", "Calendar"],
@@ -67,9 +91,18 @@ export function renderDashboard() {
   $("#todayTitle").textContent = row.session;
   $("#todayMeta").textContent = `${formatDate(row.date)} · Week ${row.week} · ${row.phase}`;
   $("#todayDistance").textContent = rowDistance(row) ? `${rowDistance(row)} km` : "-";
+  $("#todayPace").textContent = row.pace ? row.pace.range : "-";
   $("#todayDuration").textContent = row.duration || "-";
   $("#todayEquipment").textContent = row.equipment || "-";
   $("#todayFuel").textContent = row.fuel || "-";
+
+  const paceNote = $("#todayPaceNote");
+  paceNote.textContent = row.pace ? row.pace.note : "";
+  paceNote.hidden = !row.pace;
+
+  const routines = $("#todayRoutines");
+  routines.innerHTML = routinesHTML(row);
+  routines.hidden = !routines.innerHTML;
 
   $("#doneToggle").checked = Boolean(row.done);
   $("#actualKm").value = row.completed_km ?? "";
@@ -205,6 +238,7 @@ export function renderCalendar(ctx) {
       ${row ? `
         <span class="session-title"><span class="type-dot" style="--type-colour:${TYPE_COLOURS[key]}"></span>${row.session}</span>
         <span class="session-meta">${rowDistance(row) ? `${rowDistance(row)} km · ` : ""}${row.duration || ""}</span>
+        ${row.pace ? `<span class="session-meta pace">${row.pace.range}</span>` : ""}
         ${row.done ? `<span class="done-tick">✓ logged${row.completed_km != null ? ` ${row.completed_km} km` : ""}</span>` : ""}
         <span class="load-bar"><i style="--type-colour:${TYPE_COLOURS[key]};width:${Math.max(6, (rowDistance(row) / maxKm) * 100)}%"></i></span>
       ` : `<span class="session-meta">No session</span>`}
@@ -257,8 +291,9 @@ export function renderTable(ctx) {
       <td data-label="Done"><input type="checkbox" ${row.done ? "checked" : ""} aria-label="Done ${row.date}"></td>
       <td data-label="Date"><strong>${formatDate(row.date)}</strong><br><span class="muted-block">Week ${row.week} · ${row.phase || ""}</span></td>
       <td data-label="Distance"><strong>${row.distance_km || 0}</strong> km${row.done && row.completed_km != null ? `<br><span class="muted-block">did ${row.completed_km}</span>` : ""}</td>
+      <td data-label="Pace">${paceLabel(row) || "-"}</td>
       <td data-label="Type">${row.type}</td>
-      <td data-label="Session">${row.session}<br><span class="muted-block">${row.coach_note || ""}</span></td>
+      <td data-label="Session">${row.session}<br><span class="muted-block">${row.coach_note || ""}</span>${routinesHTML(row)}</td>
       <td data-label="Time">${row.duration || "-"}</td>
       <td data-label="Kit">${row.equipment || "-"}</td>
       <td data-label="Fuel">${row.fuel || "-"}</td>

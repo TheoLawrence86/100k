@@ -21,6 +21,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from .coaching import session_extras
 from .db import ROOT, connect, init_schema
 from .seed import seed
 
@@ -35,8 +36,8 @@ async def lifespan(_: FastAPI):
 app = FastAPI(title="Coach to Client: 100 km", lifespan=lifespan)
 
 # Authorisation on top of App Service Easy Auth. Easy Auth only checks that
-# the visitor *has* an account with a configured provider; with Google
-# enabled that's anyone on Earth, so the app must check *who* signed in.
+# the visitor *has* an account with the configured provider (Microsoft/Entra);
+# that's the whole tlgsolutions tenant, so the app must check *who* signed in.
 # Comma-separated emails; unset means open (local dev, no Easy Auth proxy).
 ALLOWED_EMAILS = {
     e.strip().lower()
@@ -151,6 +152,8 @@ def _plan_rows(conn, user_id: int) -> list[dict]:
         d["done"] = bool(d["done"])
         d["readiness"] = d["readiness"] or "green"
         d["notes"] = d["notes"] or ""
+        # Pace tether + strength/stretch routines, derived at serve time.
+        d.update(session_extras(d))
         out.append(d)
     return out
 

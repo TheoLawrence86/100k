@@ -219,7 +219,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 
 .detail-row {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
   gap: 14px;
   padding: 12px 0;
   border-top: 1px solid var(--rule);
@@ -228,6 +228,49 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 
 .detail-row dt { color: var(--ink-soft); font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
 .detail-row dd { margin-top: 3px; font-size: 14px; font-weight: 500; line-height: 1.35; }
+
+/* pace tether + strength/stretch routines */
+
+.pace-tether {
+  margin-top: 12px;
+  padding-left: 14px;
+  border-left: 3px solid var(--accent);
+  color: var(--accent);
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.routines {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+}
+.routine-head {
+  color: var(--accent);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.routine ul { list-style: none; display: grid; gap: 4px; }
+.routine li {
+  position: relative;
+  padding-left: 14px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.routine li::before { content: "·"; position: absolute; left: 3px; color: var(--ink-soft); }
+
+/* table + calendar pace */
+.session-meta.pace { color: var(--accent); font-weight: 600; }
+#planBody .routines { grid-template-columns: 1fr; gap: 8px; margin-top: 8px; padding-top: 8px; }
+#planBody .routine li { font-size: 12.5px; }
 
 /* logger */
 
