@@ -666,6 +666,181 @@ td input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accen
   .colophon { flex-wrap: wrap; }
 }
 
+/* ==================================================================
+   Design pass — direction: design-taste · motion: emil-design-eng
+   1) Logger        2) Kit checklist     3) Nav + charts
+   All entrance animation lives below the reduced-motion guard, which
+   stays last and disables it for users who ask. Final (rest) state is
+   always the un-animated state, so nothing depends on a keyframe.
+================================================================== */
+
+/* ---------- 2) logger: readiness + save feedback ---------- */
+
+.logger-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+.switch span:last-child { font-weight: 600; }
+/* a small kick when a session is marked done */
+.switch input:checked + .track::after { animation: knob-pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes knob-pop { 0% { transform: translateX(18px) scale(0.6); } 60% { transform: translateX(18px) scale(1.18); } 100% { transform: translateX(18px) scale(1); } }
+
+.save-status {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--green); font-size: 12px; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  opacity: 0; transform: translateY(-2px); transition: opacity 0.25s, transform 0.25s;
+}
+.save-status.show { opacity: 1; transform: none; }
+.save-status.saving { color: var(--ink-soft); }
+.save-status::before {
+  content: ""; width: 7px; height: 7px; border-radius: 50%;
+  background: currentColor;
+}
+.save-status.saving::before { animation: pulse-dot 0.9s ease-in-out infinite; }
+@keyframes pulse-dot { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+
+/* the whole card gives a soft confirming flash on save */
+.logger.flash { animation: card-flash 0.7s ease-out; }
+@keyframes card-flash {
+  0% { background: color-mix(in srgb, var(--green) 14%, transparent); }
+  100% { background: transparent; }
+}
+
+.field { display: grid; gap: 6px; }
+.field-label, .logger-row label.field { color: var(--ink-soft); font-size: 12.5px; }
+.logger-row { grid-template-columns: 120px 1fr; align-items: start; }
+
+/* segmented readiness selector */
+.readiness { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.readiness-opt {
+  display: grid; justify-items: start; gap: 2px;
+  height: auto; padding: 8px 10px; text-align: left;
+  border: 1px solid var(--rule); border-radius: 8px; background: var(--paper);
+  transition: border-color 0.18s, background 0.18s, transform 0.12s, box-shadow 0.18s;
+}
+.readiness-opt:hover { background: var(--paper-2); }
+.readiness-opt:active { transform: translateY(1px); }
+.readiness-opt .r-dot {
+  width: 11px; height: 11px; border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent);
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.readiness-opt .r-name { font-weight: 700; font-size: 13.5px; }
+.readiness-opt small { color: var(--ink-soft); font-size: 11px; line-height: 1.2; }
+.readiness-opt.is-green  .r-dot { background: var(--green); }
+.readiness-opt.is-yellow .r-dot { background: var(--yellow); }
+.readiness-opt.is-red    .r-dot { background: var(--red); }
+.readiness-opt[aria-checked="true"] { border-color: var(--sel, var(--ink)); background: color-mix(in srgb, var(--sel, var(--ink)) 9%, var(--paper)); box-shadow: inset 0 0 0 1px var(--sel, var(--ink)); }
+.readiness-opt.is-green[aria-checked="true"]  { --sel: var(--green); }
+.readiness-opt.is-yellow[aria-checked="true"] { --sel: var(--yellow); }
+.readiness-opt.is-red[aria-checked="true"]    { --sel: var(--red); }
+.readiness-opt[aria-checked="true"] .r-dot { transform: scale(1.15); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sel) 22%, transparent); }
+.readiness-opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- 2) kit: progress meters + tested toggle ---------- */
+
+.kit-progress {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px;
+  padding: 14px 0 4px;
+}
+.kit-meter { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; }
+.kit-meter .kit-meter-label { color: var(--ink-soft); font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.kit-meter .meter { height: 8px; border-radius: 999px; background: var(--paper-2); border: 1px solid var(--rule); overflow: hidden; }
+.kit-meter .meter i { display: block; height: 100%; width: 0; border-radius: 999px; background: var(--accent); transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+.kit-meter .meter.tested i { background: var(--green); }
+.kit-meter b { font-family: "Zodiak", Georgia, serif; font-size: 15px; font-variant-numeric: tabular-nums; min-width: 44px; text-align: right; }
+
+.kit-item .kit-spacer { flex: 1; }
+.tested-toggle {
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 30px; padding: 0 12px 0 10px;
+  border: 1px solid var(--rule); border-radius: 999px;
+  background: var(--paper); color: var(--ink-soft);
+  font-size: 12px; font-weight: 700; letter-spacing: 0.02em;
+  transition: border-color 0.18s, color 0.18s, background 0.18s;
+}
+.tested-toggle .tested-mark {
+  width: 16px; height: 16px; flex: 0 0 auto;
+  border: 1.5px solid currentColor; border-radius: 50%;
+  display: grid; place-items: center;
+  transition: background 0.18s, border-color 0.18s;
+}
+.tested-toggle .tested-mark::after {
+  content: ""; width: 7px; height: 4px;
+  border-left: 2px solid var(--paper); border-bottom: 2px solid var(--paper);
+  transform: rotate(-45deg) scale(0); transform-origin: center;
+  margin-top: -1px; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.tested-toggle:hover { color: var(--ink); border-color: var(--rule-strong); }
+.tested-toggle.on { color: var(--green); border-color: var(--green); background: color-mix(in srgb, var(--green) 10%, var(--paper)); }
+.tested-toggle.on .tested-mark { background: var(--green); border-color: var(--green); }
+.tested-toggle.on .tested-mark::after { transform: rotate(-45deg) scale(1); }
+.tested-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- 3) nav: icons + sliding active underline ---------- */
+
+.rail a, .tabbar a { display: inline-flex; align-items: center; gap: 7px; position: relative; }
+.rail a .nav-ico, .tabbar a .nav-ico { width: 16px; height: 16px; flex: 0 0 auto; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; opacity: 0.85; }
+.rail a { padding-bottom: 6px; }
+.rail a::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+  background: var(--accent); transform: scaleX(0); transform-origin: center;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.rail a:hover::after { transform: scaleX(0.4); }
+.rail a.active { color: var(--accent); box-shadow: none; }
+.rail a.active::after { transform: scaleX(1); }
+.rail a.active .nav-ico { opacity: 1; }
+
+.tabbar a { flex-direction: column; gap: 3px; }
+.tabbar a .nav-ico { width: 19px; height: 19px; }
+.tabbar a.active .nav-ico { opacity: 1; }
+
+/* ---------- 3) charts: tooltips, hover dots, entrance, load zones ---------- */
+
+.chart svg, .mini-chart svg { overflow: visible; }
+
+.chart-tip {
+  position: fixed; z-index: 50; pointer-events: none;
+  padding: 6px 9px; border-radius: 6px;
+  background: var(--ink); color: var(--paper);
+  font-size: 12px; line-height: 1.35; font-weight: 500;
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--ink) 30%, transparent);
+  opacity: 0; transform: translateY(3px); transition: opacity 0.14s, transform 0.14s;
+  max-width: 220px;
+}
+.chart-tip.show { opacity: 1; transform: none; }
+.chart-tip b { font-family: "Zodiak", Georgia, serif; }
+.chart-tip .tip-k { color: color-mix(in srgb, var(--paper) 70%, transparent); }
+
+.hit { fill: transparent; cursor: pointer; }
+.chart .bar-fill, .chart .bar-track { transition: opacity 0.15s; }
+.chart g.col:hover .bar-fill { opacity: 0.82; }
+.chart .dot { fill: var(--accent); stroke: var(--paper); stroke-width: 2; transition: r 0.15s; cursor: pointer; }
+.chart g.pt:hover .dot { r: 6; }
+
+/* load zones */
+.zone-fresh    { fill: var(--river);  opacity: 0.07; }
+.zone-optimal  { fill: var(--green);  opacity: 0.10; }
+.zone-strained { fill: var(--yellow); opacity: 0.08; }
+.zone-high     { fill: var(--red);    opacity: 0.08; }
+.zone-label { fill: var(--ink-soft); font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.75; }
+
+/* entrance: bars grow from baseline, lines draw on */
+.chart .bar-fill { transform-box: fill-box; transform-origin: bottom; animation: bar-grow 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+@keyframes bar-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+/* Draw the solid lines on; the planned line keeps its 5-5 dash, so it
+   animates opacity instead of dashoffset. */
+.chart .line-actual, .chart .line-ratio {
+  stroke-dasharray: var(--len, 2000); stroke-dashoffset: 0;
+  animation: line-draw 0.9s ease-out backwards;
+}
+@keyframes line-draw { from { stroke-dashoffset: var(--len, 2000); } }
+.chart .line-planned { animation: fade-in 0.9s ease-out backwards; }
+.chart .area-actual { animation: fade-in 1s ease-out backwards; }
+.chart .dot, .chart .line-actual ~ text { animation: fade-in 0.6s ease-out 0.5s backwards; }
+@keyframes fade-in { from { opacity: 0; } }
+.mini-chart .spark-line { stroke-dasharray: var(--len, 600); animation: line-draw 0.8s ease-out backwards; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }

@@ -15,7 +15,7 @@
     <link href="https://api.fontshare.com/v2/css?f[]=zodiak@400,401,700&f[]=supreme@400,401,500,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css"
       integrity="sha256-qx5w1Z7EBGW65+cDDaLzzPKBM/1QLmK9WY7vut/XpzI=" crossorigin="">
-    <link rel="stylesheet" href="styles.css?v=journal-5">
+    <link rel="stylesheet" href="styles.css?v=journal-6">
   </head>
   <body>
     <header class="masthead">
@@ -79,21 +79,31 @@
           <ul class="pace-plan" id="todayPacePlan" hidden></ul>
           <div class="routines" id="todayRoutines" hidden></div>
 
-          <div class="logger">
-            <label class="check switch">
-              <input id="doneToggle" type="checkbox">
-              <span class="track" aria-hidden="true"></span>
-              Session done
-            </label>
-            <div class="logger-row">
-              <label>Actual km<input id="actualKm" type="number" min="0" step="0.5" placeholder="km"></label>
-              <label>Legs
-                <select id="readinessSelect">
-                  <option value="green">Green: do the plan</option>
-                  <option value="yellow">Yellow: cut 30-50%</option>
-                  <option value="red">Red: rest only</option>
-                </select>
+          <div class="logger" id="logger">
+            <div class="logger-head">
+              <label class="check switch">
+                <input id="doneToggle" type="checkbox">
+                <span class="track" aria-hidden="true"></span>
+                <span>Session done</span>
               </label>
+              <span class="save-status" id="saveStatus" role="status" aria-live="polite"></span>
+            </div>
+            <div class="logger-row">
+              <label class="field">Actual km<input id="actualKm" type="number" min="0" step="0.5" placeholder="km"></label>
+              <div class="field">
+                <span class="field-label" id="readinessLabel">Legs</span>
+                <div class="readiness" id="readinessControl" role="radiogroup" aria-labelledby="readinessLabel">
+                  <button type="button" class="readiness-opt is-green" data-readiness="green" role="radio" aria-checked="false">
+                    <span class="r-dot" aria-hidden="true"></span><span class="r-name">Green</span><small>do the plan</small>
+                  </button>
+                  <button type="button" class="readiness-opt is-yellow" data-readiness="yellow" role="radio" aria-checked="false">
+                    <span class="r-dot" aria-hidden="true"></span><span class="r-name">Yellow</span><small>cut 30–50%</small>
+                  </button>
+                  <button type="button" class="readiness-opt is-red" data-readiness="red" role="radio" aria-checked="false">
+                    <span class="r-dot" aria-hidden="true"></span><span class="r-name">Red</span><small>rest only</small>
+                  </button>
+                </div>
+              </div>
             </div>
             <label class="notes-label" for="noteBox">Notes to your coach</label>
             <textarea id="noteBox" rows="3" placeholder="Pain, kit, food, sleep, changes."></textarea>
@@ -273,6 +283,6 @@
 
     <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"
       integrity="sha256-RamwepGJzlYFTGIKlHzPQeKR5YyV6bYVM7dAqqZe5cs=" crossorigin=""></script>
-    <script type="module" src="js/main.js?v=journal-5"></script>
+    <script type="module" src="js/main.js?v=journal-6"></script>
   </body>
 </html>
