@@ -50,7 +50,7 @@ export function sparkline(values) {
     .map((v, i) => `${(i * step).toFixed(1)},${(H - 4 - (v / max) * (H - 10)).toFixed(1)}`)
     .join(" ");
   return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
-    <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>
+    <polyline class="spark-line" points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>
   </svg>`;
 }
 
@@ -72,11 +72,15 @@ export function weeklyBars(weeks) {
       const ch = (w.completed_km / max) * innerH;
       const over = w.completed_km > w.planned_km * 1.15;
       const current = w.is_current ? ` font-weight="700" fill="var(--accent)"` : "";
+      const pct = w.planned_km ? Math.round((w.completed_km / w.planned_km) * 100) : 0;
+      const tip = `Week ${w.week}${w.is_current ? " · this week" : ""}|${w.completed_km} of ${w.planned_km} km · ${pct}%`;
       return `
-        <rect class="bar-track" x="${x}" y="${pad.t + innerH - ph}" width="${bw}" height="${Math.max(ph, 1)}" rx="4"/>
-        <rect class="bar-fill${over ? " over" : ""}" x="${x}" y="${pad.t + innerH - ch}" width="${bw}" height="${Math.max(ch, 0)}" rx="4">
-          <title>Week ${w.week}: ${w.completed_km} of ${w.planned_km} km</title></rect>
-        <text x="${x + bw / 2}" y="${H - 8}" text-anchor="middle"${current}>W${w.week}</text>`;
+        <g class="col" data-tip="${esc(tip)}">
+          <rect class="bar-track" x="${x}" y="${pad.t + innerH - ph}" width="${bw}" height="${Math.max(ph, 1)}" rx="4"/>
+          <rect class="bar-fill${over ? " over" : ""}" x="${x}" y="${pad.t + innerH - ch}" width="${bw}" height="${Math.max(ch, 0)}" rx="4" style="animation-delay:${(i * 35).toFixed(0)}ms"/>
+          <rect class="hit" x="${pad.l + i * slot}" y="${pad.t}" width="${slot}" height="${innerH}"/>
+          <text x="${x + bw / 2}" y="${H - 8}" text-anchor="middle"${current}>W${w.week}</text>
+        </g>`;
     })
     .join("");
 
@@ -125,12 +129,27 @@ export function cumulativeChart(cumulative) {
        <text x="${Math.min(x(cumulative.indexOf(lastActual)) + 8, W - 60)}" y="${y(lastActual.completed_km) - 8}" fill="var(--accent)">${lastActual.completed_km} km</text>`
     : "";
 
+  const dots = actualPts
+    .map((c) => {
+      const i = cumulative.indexOf(c);
+      const plan = c.planned_km;
+      const diff = c.completed_km - plan;
+      const sign = diff >= 0 ? "+" : "−";
+      const tip = `${c.label || `Point ${i + 1}`}|${c.completed_km} km actual · ${sign}${Math.abs(Math.round(diff))} vs plan`;
+      return `<g class="pt" data-tip="${esc(tip)}">
+        <circle class="dot" cx="${x(i).toFixed(1)}" cy="${y(c.completed_km).toFixed(1)}" r="3.5"/>
+        <circle class="hit" cx="${x(i).toFixed(1)}" cy="${y(c.completed_km).toFixed(1)}" r="12"/>
+      </g>`;
+    })
+    .join("");
+
   return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img"
     aria-label="Cumulative kilometres, plan versus actual">
     ${gridlines}
     <polyline class="line-planned" points="${planned}" stroke-width="2"/>
     ${area ? `<path class="area-actual" d="${area}"/>` : ""}
     ${actual ? `<polyline class="line-actual" points="${actual}" stroke-width="2.5"/>` : ""}
+    ${dots}
     ${marker}
   </svg>`;
 }
@@ -152,15 +171,42 @@ export function loadChart(series) {
   const y = (v) => pad.t + innerH - (Math.min(v, maxRatio) / maxRatio) * innerH;
 
   const line = pts.map((s) => `${x(series.indexOf(s)).toFixed(1)},${y(s.ratio).toFixed(1)}`).join(" ");
-  const band = `<rect class="ratio-band" x="${pad.l}" y="${y(1.3)}" width="${innerW}" height="${y(0.8) - y(1.3)}"/>`;
-  const gridlines = [0.8, 1, 1.3]
+
+  // Readable load zones: undertraining / sweet-spot / pushing / risky.
+  const zone = (cls, hi, lo, label) => {
+    const top = y(hi);
+    const h = y(lo) - y(hi);
+    return `<rect class="${cls}" x="${pad.l}" y="${top.toFixed(1)}" width="${innerW}" height="${h.toFixed(1)}"/>
+      <text class="zone-label" x="${W - pad.r - 4}" y="${(top + 11).toFixed(1)}" text-anchor="end">${label}</text>`;
+  };
+  const zones =
+    zone("zone-high", maxRatio, 1.5, "Risky") +
+    zone("zone-strained", 1.5, 1.3, "Pushing") +
+    zone("zone-optimal", 1.3, 0.8, "Sweet spot") +
+    zone("zone-fresh", 0.8, 0, "Fresh");
+
+  const gridlines = [0.8, 1, 1.3, 1.5]
     .map((v) => `<line class="axis" x1="${pad.l}" y1="${y(v)}" x2="${W - pad.r}" y2="${y(v)}"/>
       <text x="${pad.l - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`)
     .join("");
 
+  const verdict = (r) =>
+    r > 1.5 ? "risky ramp" : r > 1.3 ? "pushing on" : r < 0.8 ? "fresh" : "sweet spot";
+  const dots = pts
+    .map((s) => {
+      const i = series.indexOf(s);
+      const tip = `${s.label || `Day ${i + 1}`}|${s.ratio.toFixed(2)}× load · ${verdict(s.ratio)}`;
+      return `<g class="pt" data-tip="${esc(tip)}">
+        <circle class="dot" cx="${x(i).toFixed(1)}" cy="${y(s.ratio).toFixed(1)}" r="3"/>
+        <circle class="hit" cx="${x(i).toFixed(1)}" cy="${y(s.ratio).toFixed(1)}" r="11"/>
+      </g>`;
+    })
+    .join("");
+
   return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img"
-    aria-label="Acute to chronic training load ratio">${band}${gridlines}
+    aria-label="Acute to chronic training load ratio">${zones}${gridlines}
     <polyline class="line-ratio" points="${line}" stroke-width="2.5"/>
+    ${dots}
   </svg>`;
 }
 

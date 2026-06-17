@@ -9,6 +9,9 @@ import {
   renderTable,
   renderProgress,
   renderKit,
+  decorateNav,
+  setReadiness,
+  getReadiness,
 } from "./views.js";
 import { renderRoute, wireRouteView } from "./route.js";
 
@@ -106,14 +109,32 @@ function loggerPayload() {
   return {
     done: $("#doneToggle").checked,
     completed_km: Number.isFinite(value) ? value : null,
-    readiness: $("#readinessSelect").value,
+    readiness: getReadiness(),
     notes: $("#noteBox").value,
   };
+}
+
+let statusTimer;
+function showSaveStatus(state) {
+  const el = $("#saveStatus");
+  if (!el) return;
+  clearTimeout(statusTimer);
+  if (state === "saving") {
+    el.textContent = "Saving";
+    el.className = "save-status saving show";
+  } else {
+    el.textContent = "Saved";
+    el.className = "save-status show";
+    $("#logger").classList.add("flash");
+    setTimeout(() => $("#logger").classList.remove("flash"), 700);
+    statusTimer = setTimeout(() => el.classList.remove("show"), 1800);
+  }
 }
 
 async function saveSelected() {
   const row = selectedRow();
   if (!row) return;
+  showSaveStatus("saving");
   const saved = await saveLog(row.date, loggerPayload());
   Object.assign(row, {
     done: Boolean(saved.done),
@@ -124,6 +145,7 @@ async function saveSelected() {
   renderDashboard();
   refreshProgress();
   refreshBrief();
+  showSaveStatus("saved");
 }
 
 let noteTimer;
@@ -187,7 +209,12 @@ $("#allButton").addEventListener("click", () => { state.mode = "all"; renderTabl
 
 $("#doneToggle").addEventListener("change", saveSelected);
 $("#actualKm").addEventListener("change", saveSelected);
-$("#readinessSelect").addEventListener("change", saveSelected);
+$("#readinessControl").addEventListener("click", (event) => {
+  const opt = event.target.closest(".readiness-opt");
+  if (!opt) return;
+  setReadiness(opt.dataset.readiness);
+  saveSelected();
+});
 $("#noteBox").addEventListener("input", saveSelectedDebounced);
 
 $("#themeToggle").addEventListener("click", toggleTheme);
@@ -223,6 +250,7 @@ async function boot() {
     picker.max = state.plan[state.plan.length - 1].date;
     picker.value = state.selectedDate;
 
+    decorateNav();
     applyRoute();
     await refreshProgress();
     refreshBrief();

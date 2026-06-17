@@ -23,6 +23,69 @@ import {
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
+/* ---------- chart tooltips ---------- */
+// A single floating tip element follows the pointer over any [data-tip] node.
+// data-tip format: "Title|detail line".
+let tipEl;
+function chartTip() {
+  if (!tipEl) {
+    tipEl = document.createElement("div");
+    tipEl.className = "chart-tip";
+    document.body.appendChild(tipEl);
+  }
+  return tipEl;
+}
+
+export function wireChartTips() {
+  const tip = chartTip();
+  $$(".chart [data-tip]").forEach((node) => {
+    node.addEventListener("pointerenter", () => {
+      const [title, detail] = node.dataset.tip.split("|");
+      tip.innerHTML = `<b>${title}</b>${detail ? `<br><span class="tip-k">${detail}</span>` : ""}`;
+      tip.classList.add("show");
+    });
+    node.addEventListener("pointermove", (e) => {
+      tip.style.left = `${e.clientX + 14}px`;
+      tip.style.top = `${e.clientY - 10}px`;
+    });
+    node.addEventListener("pointerleave", () => tip.classList.remove("show"));
+  });
+}
+
+/* ---------- nav icons ---------- */
+// Minimal line glyphs, drawn once into every [data-nav] link (rail + tabbar).
+const NAV_ICONS = {
+  dashboard: '<path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/>',
+  calendar: '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',
+  plan: '<path d="M8 6h12M8 12h12M8 18h12M3.5 6h.01M3.5 12h.01M3.5 18h.01"/>',
+  route: '<path d="M6 19a3 3 0 0 0 3-3V8a3 3 0 0 1 6 0v8"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/>',
+  progress: '<path d="M4 19V5M4 19h16"/><path d="M8 16l4-5 3 3 4-6"/>',
+  kit: '<path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+};
+
+export function decorateNav() {
+  $$("[data-nav]").forEach((link) => {
+    if (link.querySelector(".nav-ico")) return;
+    const glyph = NAV_ICONS[link.dataset.nav];
+    if (!glyph) return;
+    const label = link.textContent.trim();
+    link.innerHTML =
+      `<svg class="nav-ico" viewBox="0 0 24 24" aria-hidden="true">${glyph}</svg><span>${label}</span>`;
+  });
+}
+
+/* ---------- readiness segmented control ---------- */
+export function setReadiness(value) {
+  $$("#readinessControl .readiness-opt").forEach((btn) => {
+    btn.setAttribute("aria-checked", String(btn.dataset.readiness === value));
+  });
+}
+
+export function getReadiness() {
+  const on = $("#readinessControl .readiness-opt[aria-checked='true']");
+  return on ? on.dataset.readiness : "green";
+}
+
 // Short pace label for tight spaces (table/calendar): just the band, no prose.
 const paceLabel = (row) => (row.pace ? row.pace.range : "");
 
@@ -122,7 +185,7 @@ export function renderDashboard() {
 
   $("#doneToggle").checked = Boolean(row.done);
   $("#actualKm").value = row.completed_km ?? "";
-  $("#readinessSelect").value = row.readiness || "green";
+  setReadiness(row.readiness || "green");
   $("#noteBox").value = row.notes || "";
 
   renderBrief();
@@ -337,6 +400,7 @@ export function renderProgress() {
     $("#weeksChart").innerHTML = weeklyBars(load.weeks);
     $("#cumulativeChart").innerHTML = cumulativeChart(load.cumulative);
     $("#loadChart").innerHTML = loadChart(load.series);
+    wireChartTips();
   }
   if (!p) return;
 
@@ -367,10 +431,29 @@ export function renderKit(ctx) {
   const list = $("#kitView");
   if (!list) return;
   const items = state.kit;
+  const total = items.length || 1;
   const packed = items.filter((i) => i.checked).length;
-  $("#kitSummary").textContent = `${packed} of ${items.length} packed · ${items.filter((i) => i.tested).length} tested in training`;
+  const tested = items.filter((i) => i.tested).length;
+  $("#kitSummary").textContent = `${packed} of ${items.length} packed · ${tested} tested in training`;
 
   list.innerHTML = "";
+
+  // Two progress meters so "how ready is my kit" reads at a glance.
+  const meters = document.createElement("div");
+  meters.className = "kit-progress";
+  meters.innerHTML = `
+    <div class="kit-meter">
+      <span class="kit-meter-label">Packed</span>
+      <div class="meter"><i style="width:${Math.round((packed / total) * 100)}%"></i></div>
+      <b>${packed}/${items.length}</b>
+    </div>
+    <div class="kit-meter">
+      <span class="kit-meter-label">Tested</span>
+      <div class="meter tested"><i style="width:${Math.round((tested / total) * 100)}%"></i></div>
+      <b>${tested}/${items.length}</b>
+    </div>`;
+  list.appendChild(meters);
+
   let lastCat = null;
   items.forEach((item) => {
     if (item.category !== lastCat) {
@@ -385,11 +468,15 @@ export function renderKit(ctx) {
     row.innerHTML = `
       <input type="checkbox" id="kit-${item.id}" ${item.checked ? "checked" : ""}>
       <label class="kit-label" for="kit-${item.id}">${item.label}</label>
-      <button type="button" class="tested-pill${item.tested ? " on" : ""}"
-        aria-pressed="${item.tested}">${item.tested ? "✓ tested" : "untested"}</button>
+      <span class="kit-spacer"></span>
+      <button type="button" class="tested-toggle${item.tested ? " on" : ""}" aria-pressed="${item.tested}"
+        aria-label="${item.tested ? "Tested in training" : "Mark as tested in training"}">
+        <span class="tested-mark" aria-hidden="true"></span>
+        <span class="tested-text">${item.tested ? "Tested" : "Test it"}</span>
+      </button>
     `;
     row.querySelector("input").addEventListener("change", (e) => ctx.updateKit(item, { checked: e.target.checked }));
-    row.querySelector(".tested-pill").addEventListener("click", () => ctx.updateKit(item, { tested: !item.tested }));
+    row.querySelector(".tested-toggle").addEventListener("click", () => ctx.updateKit(item, { tested: !item.tested }));
     list.appendChild(row);
   });
 }
