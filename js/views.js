@@ -89,31 +89,35 @@ export function getReadiness() {
 // Short pace label for tight spaces (table/calendar): just the band, no prose.
 const paceLabel = (row) => (row.pace ? row.pace.range : "");
 
-// The event's goal-time pacing plan as a small bulleted block ("" when absent).
+// One routine entry: movement name on the left, prescription on the right.
+const routineItem = (m) =>
+  `<li><span class="routine-name">${m.name}</span><span class="routine-dose">${m.dose}</span></li>`;
+
+// The event's goal-time pacing plan as a small structured block ("" when absent).
 function pacePlanHTML(row) {
   if (!row.pace?.plan?.length) return "";
   return (
     `<div class="routine"><p class="routine-head">20-hour pacing plan</p><ul>` +
-    row.pace.plan.map((p) => `<li>${p}</li>`).join("") +
+    row.pace.plan.map(routineItem).join("") +
     `</ul></div>`
   );
 }
 
-// Strength + stretch routines as a small bulleted block. Returns "" when the
+// Strength + stretch routines as a small structured block. Returns "" when the
 // session has neither, so callers can skip rendering entirely.
 function routinesHTML(row) {
   const blocks = [];
   if (row.strength?.length) {
     blocks.push(
       `<div class="routine"><p class="routine-head">Strength</p><ul>` +
-        row.strength.map((m) => `<li>${m}</li>`).join("") +
+        row.strength.map(routineItem).join("") +
         `</ul></div>`,
     );
   }
   if (row.mobility?.length) {
     blocks.push(
       `<div class="routine"><p class="routine-head">Stretch &amp; mobility</p><ul>` +
-        row.mobility.map((m) => `<li>${m}</li>`).join("") +
+        row.mobility.map(routineItem).join("") +
         `</ul></div>`,
     );
   }
@@ -175,7 +179,7 @@ export function renderDashboard() {
 
   const pacePlan = $("#todayPacePlan");
   pacePlan.innerHTML = row.pace?.plan?.length
-    ? row.pace.plan.map((p) => `<li>${p}</li>`).join("")
+    ? row.pace.plan.map(routineItem).join("")
     : "";
   pacePlan.hidden = !pacePlan.innerHTML;
 

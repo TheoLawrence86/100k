@@ -12,7 +12,7 @@
     </script>
     <link rel="preconnect" href="https://api.fontshare.com">
     <link href="https://api.fontshare.com/v2/css?f[]=zodiak@400,401,700&f[]=supreme@400,401,500,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=journal-6">
+    <link rel="stylesheet" href="styles.css?v=journal-7">
     <style>
       /* Splash-only layout on top of the journal's print look. */
       .splash {
@@ -44,7 +44,23 @@
       .pace-floor p { font-size: 14px; color: var(--ink-soft); }
 
       .splash-routine { display: grid; gap: 10px; padding-top: 4px; }
-      .splash-routine ul { margin: 0; padding-left: 18px; font-size: 14.5px; display: grid; gap: 3px; }
+      .splash-routine ul { margin: 0; padding: 0; list-style: none; font-size: 14.5px; display: grid; }
+      .splash-routine li {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 5px 0;
+        border-bottom: 1px solid var(--rule);
+      }
+      .splash-routine li:last-child { border-bottom: 0; }
+      .splash-routine .routine-name { font-weight: 500; }
+      .splash-routine .routine-dose {
+        color: var(--ink-soft);
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+        flex-shrink: 0;
+      }
       .splash-focus { font-style: italic; color: var(--ink-soft); font-size: 14.5px; }
       .splash-after { color: var(--ink-soft); font-size: 14px; border-top: 1px solid var(--rule); padding-top: 12px; }
 
@@ -104,7 +120,7 @@
       </article>
 
       <a class="splash-login" href="/journal">Open the journal →</a>
-      <p class="splash-note">Logging, progress and everything else needs a sign-in — this page never does.</p>
+      <p class="splash-note">Logging, progress and everything else needs a sign-in. This page never does.</p>
     </main>
 
     <script>
@@ -135,7 +151,13 @@
         const list = document.createElement("ul");
         for (const item of items) {
           const li = document.createElement("li");
-          li.textContent = item;
+          const name = document.createElement("span");
+          name.className = "routine-name";
+          name.textContent = item.name;
+          const dose = document.createElement("span");
+          dose.className = "routine-dose";
+          dose.textContent = item.dose;
+          li.append(name, dose);
           list.append(li);
         }
         wrap.append(kicker, list);
@@ -147,7 +169,7 @@
         try {
           data = await (await fetch("/api/next")).json();
         } catch {
-          $("title").textContent = "Cannot reach the coach — try again in a minute.";
+          $("title").textContent = "Cannot reach the coach. Try again in a minute.";
           return;
         }
 
@@ -159,7 +181,7 @@
         const s = data.session;
         if (!s) {
           $("chip").textContent = "Done";
-          $("title").textContent = "No sessions left on the plan — see you at the finish.";
+          $("title").textContent = "No sessions left on the plan. See you at the finish.";
           return;
         }
 
@@ -200,7 +222,7 @@
         }
         if (data.after) {
           const km = data.after.distance_km ? ` · ${data.after.distance_km} km` : "";
-          $("after").textContent = `Then: ${dayLabel(data.after.date, data.today)} — ${data.after.session}${km}`;
+          $("after").textContent = `Then: ${dayLabel(data.after.date, data.today)} · ${data.after.session}${km}`;
           $("after").hidden = false;
         }
       }

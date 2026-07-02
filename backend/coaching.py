@@ -16,38 +16,39 @@ tether ("do not drop below this") for someone who runs the easy days too hard.
 import re
 
 # Strength and mobility routines, mirrored from docs/strength-mobility.md so the
-# app shows the same movements the plan refers to by label.
+# app shows the same movements the plan refers to by label. Each item is a
+# {name, dose} pair so the UI can lay out movement and prescription as columns.
 STRENGTH_PLANS = {
     "A": [
-        "Squat or sit-to-stand — 3 × 8-10",
-        "Step-ups — 3 × 8 each leg",
-        "Calf raises — 3 × 12-15",
-        "Side plank — 3 × 20-40s each side",
-        "Dead bug — 3 × 8 each side",
+        {"name": "Squat or sit-to-stand", "dose": "3 × 8-10"},
+        {"name": "Step-ups", "dose": "3 × 8 each leg"},
+        {"name": "Calf raises", "dose": "3 × 12-15"},
+        {"name": "Side plank", "dose": "3 × 20-40s each side"},
+        {"name": "Dead bug", "dose": "3 × 8 each side"},
     ],
     "B": [
-        "Reverse lunge — 3 × 8 each leg",
-        "Hip hinge / Romanian deadlift — 3 × 8-10",
-        "Glute bridge — 3 × 12",
-        "Band lateral walk — 3 × 10 each way",
-        "Front plank — 3 × 30-60s",
+        {"name": "Reverse lunge", "dose": "3 × 8 each leg"},
+        {"name": "Hip hinge / Romanian deadlift", "dose": "3 × 8-10"},
+        {"name": "Glute bridge", "dose": "3 × 12"},
+        {"name": "Band lateral walk", "dose": "3 × 10 each way"},
+        {"name": "Front plank", "dose": "3 × 30-60s"},
     ],
     # Race-week / taper activation: switch the muscles on, add no fatigue.
     "Activation": [
-        "Glute bridge — 2 × 10",
-        "Band lateral walk — 2 × 10 each way",
-        "Bodyweight squat — 2 × 8",
-        "Calf raises — 2 × 12",
+        {"name": "Glute bridge", "dose": "2 × 10"},
+        {"name": "Band lateral walk", "dose": "2 × 10 each way"},
+        {"name": "Bodyweight squat", "dose": "2 × 8"},
+        {"name": "Calf raises", "dose": "2 × 12"},
     ],
 }
 
-# "Mobility 10" — the stretch routine that closes every strength session.
+# "Mobility 10": the stretch routine that closes every strength session.
 MOBILITY_PLAN = [
-    "Calves — 60s each",
-    "Hip flexors — 60s each",
-    "Hamstrings — 60s each",
-    "Glutes — 60s each",
-    "Thoracic rotations — 10 each side",
+    {"name": "Calves", "dose": "60s each"},
+    {"name": "Hip flexors", "dose": "60s each"},
+    {"name": "Hamstrings", "dose": "60s each"},
+    {"name": "Glutes", "dose": "60s each"},
+    {"name": "Thoracic rotations", "dose": "10 each side"},
 ]
 
 
@@ -107,17 +108,23 @@ def event_pace_plan() -> dict:
         "range": f"{_mmss(move_fast)}–{_mmss(move_slow)} /km moving",
         "floor": _mmss(move_fast),
         "note": (
-            f"20-hour finish: move at ~{_mmss(move_mid)}/km and keep stops short — "
-            f"the time comes from not stopping long, not from rushing. Do not dip "
+            f"20-hour finish: move at ~{_mmss(move_mid)}/km and keep stops short. "
+            f"The time comes from not stopping long, not from rushing. Do not dip "
             f"under {_mmss(move_fast)}/km in the first 50 km."
         ),
         "plan": [
-            f"Goal — {int(GOAL_HOURS)}:00 elapsed for 100 km",
-            f"Overall pace incl. stops — {_mmss(overall)}/km",
-            f"Moving pace — ~{_mmss(move_mid)}/km (hold {_mmss(move_fast)}–{_mmss(move_slow)})",
-            f"Stops budget — ~{STOPS_MIN_BUDGET} min total "
-            f"({STOPS_MIN_RANGE[0]}–{STOPS_MIN_RANGE[1]}), incl. the 50 km Runnymede reset",
-            "Halfway (50 km) — aim ~10:00 elapsed, even split",
+            {"name": "Goal", "dose": f"{int(GOAL_HOURS)}:00 elapsed for 100 km"},
+            {"name": "Overall pace incl. stops", "dose": f"{_mmss(overall)}/km"},
+            {
+                "name": "Moving pace",
+                "dose": f"~{_mmss(move_mid)}/km (hold {_mmss(move_fast)}–{_mmss(move_slow)})",
+            },
+            {
+                "name": "Stops budget",
+                "dose": f"~{STOPS_MIN_BUDGET} min total "
+                f"({STOPS_MIN_RANGE[0]}–{STOPS_MIN_RANGE[1]}), incl. the 50 km Runnymede reset",
+            },
+            {"name": "Halfway (50 km)", "dose": "aim ~10:00 elapsed, even split"},
         ],
     }
 
@@ -136,7 +143,7 @@ def pace_band(distance_km: float, duration: str) -> dict | None:
     return {
         "range": f"{_mmss(fast)}–{_mmss(slow)} /km",
         "floor": _mmss(fast),
-        "note": f"Hold back: no quicker than {_mmss(fast)}/km — let the easy days stay easy.",
+        "note": f"Hold back: no quicker than {_mmss(fast)}/km. Let the easy days stay easy.",
     }
 
 

@@ -161,14 +161,14 @@ async function generate() {
     let start = pinnedStart;
     let note = "Wrong spot? Drag the pin and the loop replots.";
     if (start) {
-      note = "Starting from your pinned spot — “Use my location” to go back to GPS.";
+      note = "Starting from your pinned spot. Tap “Use my location” to go back to GPS.";
     } else {
       setStatus("Finding you…");
       start = await locate();
       if (start.accuracy > 2000) {
         note =
           `Heads-up: your browser only knows your position to about ` +
-          `${Math.round(start.accuracy / 1000)} km, so the start may be off — ` +
+          `${Math.round(start.accuracy / 1000)} km, so the start may be off. ` +
           `drag the pin (or “Drop pin on map”) and I'll replot.`;
       }
     }
@@ -183,7 +183,7 @@ async function generate() {
     const offTarget = Math.abs(route.actual_km - km) / km > 0.2;
     setStatus(
       offTarget
-        ? `Closest loop the paths here allow: ${route.actual_km} km against your ${km} km target — try “Deal another” for a different shape. ${note}`
+        ? `Closest loop the paths here allow: ${route.actual_km} km against your ${km} km target. Try “Deal another” for a different shape. ${note}`
         : `Done: a ${route.actual_km} km loop, back to the same spot. ${note}`
     );
   } catch (err) {
@@ -244,7 +244,7 @@ function toggleDropPin() {
   const m = ensureMap();
   m.once("click", onDropClick);
   m.getCanvas().style.cursor = "crosshair";
-  setStatus("Tap the map where your run starts — zoom and pan first if you need to.");
+  setStatus("Tap the map where your run starts. Zoom and pan first if you need to.");
 }
 
 function buildGpx() {
@@ -322,7 +322,7 @@ export function renderRoute() {
     $("#routeNeed").textContent =
       `${when}: ${session.session} · ${rowDistance(session)} km on the plan.`;
   } else {
-    $("#routeNeed").textContent = "Nothing on the plan — pick your own distance.";
+    $("#routeNeed").textContent = "Nothing on the plan. Pick your own distance.";
   }
 
   // The map measures its container, so wait until the view is visible.

@@ -260,29 +260,36 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 .pace-plan {
   list-style: none;
   display: grid;
-  gap: 5px;
   margin-top: 12px;
-  padding: 12px 0 0 14px;
+  padding: 12px 0 0;
   border-top: 1px solid var(--rule);
 }
-.pace-plan li {
-  position: relative;
-  padding-left: 14px;
-  font-size: 13.5px;
-  line-height: 1.45;
-  color: var(--ink);
-}
-.pace-plan li::before { content: "›"; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+.routine ul { list-style: none; display: grid; padding: 0; }
 
-.routine ul { list-style: none; display: grid; gap: 4px; }
+.pace-plan li,
 .routine li {
-  position: relative;
-  padding-left: 14px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--rule);
   font-size: 13.5px;
   line-height: 1.45;
   color: var(--ink);
 }
-.routine li::before { content: "·"; position: absolute; left: 3px; color: var(--ink-soft); }
+.pace-plan li:last-child,
+.routine li:last-child { border-bottom: 0; }
+
+.routine-name { font-weight: 500; }
+.routine-dose {
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  flex-shrink: 0;
+}
+/* Long pacing-plan doses (parenthetical ranges) may wrap on narrow screens. */
+.pace-plan .routine-dose { flex-shrink: 1; max-width: 60%; }
 
 /* table + calendar pace */
 .session-meta.pace { color: var(--accent); font-weight: 600; }
