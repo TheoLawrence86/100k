@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/ ./backend/
 COPY data/ ./data/
 COPY docs/ ./docs/
-COPY index.html styles.css manifest.webmanifest sw.js ./
+COPY index.html splash.html styles.css manifest.webmanifest sw.js ./
 COPY js/ ./js/
 COPY assets/ ./assets/
 
