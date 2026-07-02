@@ -179,6 +179,7 @@ async function generate() {
     drawRoute(route);
     $("#routeActual").textContent = `${route.actual_km} km`;
     $("#routeGpx").disabled = false;
+    $("#routeGpxFile").disabled = false;
     const offTarget = Math.abs(route.actual_km - km) / km > 0.2;
     setStatus(
       offTarget
@@ -246,8 +247,7 @@ function toggleDropPin() {
   setStatus("Tap the map where your run starts — zoom and pan first if you need to.");
 }
 
-async function downloadGpx() {
-  if (!lastRoute) return;
+function buildGpx() {
   const pts = lastRoute.coords
     .map(([lat, lon]) => `      <trkpt lat="${lat}" lon="${lon}"></trkpt>`)
     .join("\n");
@@ -260,8 +260,25 @@ ${pts}
     </trkseg>
   </trk>
 </gpx>`;
-  const name = `loop-${lastRoute.actual_km}km.gpx`;
-  // On the phone, the share sheet hands the GPX straight to a watch nav app
+  return { gpx, name: `loop-${lastRoute.actual_km}km.gpx` };
+}
+
+// Save the GPX straight to disk / the Files app. This is the reliable path:
+// some watch nav apps only register a Files "import" hook and never show up
+// in the iOS share sheet, so we always offer a plain download too.
+function saveGpxFile() {
+  if (!lastRoute) return;
+  const { gpx, name } = buildGpx();
+  const url = URL.createObjectURL(new Blob([gpx], { type: "application/gpx+xml" }));
+  const a = Object.assign(document.createElement("a"), { href: url, download: name });
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function shareGpx() {
+  if (!lastRoute) return;
+  const { gpx, name } = buildGpx();
+  // On the phone, the share sheet can hand the GPX straight to a watch nav app
   // (WorkOutDoors, Komoot, Footpath…) — no detour through the Files app.
   const file = new File([gpx], name, { type: "application/gpx+xml" });
   if (navigator.canShare?.({ files: [file] })) {
@@ -273,10 +290,7 @@ ${pts}
       // Share failed for real — fall through to the plain download.
     }
   }
-  const url = URL.createObjectURL(new Blob([gpx], { type: "application/gpx+xml" }));
-  const a = Object.assign(document.createElement("a"), { href: url, download: name });
-  a.click();
-  URL.revokeObjectURL(url);
+  saveGpxFile();
 }
 
 export function wireRouteView() {
@@ -285,9 +299,18 @@ export function wireRouteView() {
   $("#routeLocate").addEventListener("click", useMyLocation);
   $("#routeDrop").addEventListener("click", toggleDropPin);
   const gpxBtn = $("#routeGpx");
-  gpxBtn.addEventListener("click", downloadGpx);
+  const fileBtn = $("#routeGpxFile");
+  gpxBtn.addEventListener("click", shareGpx);
+  fileBtn.addEventListener("click", saveGpxFile);
   const probe = new File([""], "probe.gpx", { type: "application/gpx+xml" });
-  if (navigator.canShare?.({ files: [probe] })) gpxBtn.textContent = "Send GPX to watch app";
+  // Only expose the share button where file-sharing actually works (mainly the
+  // phone). On desktop it's unsupported, so the share button just hides and the
+  // plain "Save GPX file" button carries the load.
+  if (navigator.canShare?.({ files: [probe] })) {
+    gpxBtn.textContent = "Send GPX to watch app";
+  } else {
+    gpxBtn.hidden = true;
+  }
 }
 
 export function renderRoute() {

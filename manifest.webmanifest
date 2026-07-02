@@ -2,7 +2,7 @@
   "name": "Thames Path 100K Training Journal",
   "short_name": "100K",
   "description": "Coach-to-athlete training journal for the 2026 Thames Path Ultra Challenge.",
-  "start_url": "/",
+  "start_url": "/journal",
   "display": "standalone",
   "background_color": "#f2e7d3",
   "theme_color": "#f2e7d3",

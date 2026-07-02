@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Next session · Thames Path 100K</title>
+    <meta name="theme-color" content="#f2e7d3">
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+    <script>
+      // Apply the stored theme before first paint to avoid a flash.
+      document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    </script>
+    <link rel="preconnect" href="https://api.fontshare.com">
+    <link href="https://api.fontshare.com/v2/css?f[]=zodiak@400,401,700&f[]=supreme@400,401,500,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=journal-6">
+    <style>
+      /* Splash-only layout on top of the journal's print look. */
+      .splash {
+        max-width: 620px;
+        margin: 0 auto;
+        padding: 28px 20px 60px;
+        display: grid;
+        gap: 22px;
+      }
+      .splash-mast { display: flex; align-items: center; gap: 14px; }
+      .splash-mast img { width: 52px; height: 52px; }
+      .splash-mast strong { font-family: "Zodiak", Georgia, serif; font-size: 19px; display: block; }
+      .splash-mast span { color: var(--ink-soft); font-size: 13px; }
+      .splash-count { margin-left: auto; text-align: right; }
+      .splash-count b { font-family: "Zodiak", Georgia, serif; font-size: 26px; display: block; line-height: 1; }
+      .splash-count small { color: var(--ink-soft); }
+
+      .splash-card { border-top: 2px solid var(--rule-strong); border-bottom: 1px solid var(--rule); padding: 20px 0 24px; display: grid; gap: 14px; }
+      .splash-card h1 { font-size: 28px; line-height: 1.15; }
+
+      .pace-floor {
+        border-left: 3px solid var(--accent);
+        padding: 4px 0 4px 14px;
+        display: grid;
+        gap: 2px;
+      }
+      .pace-floor .kicker { color: var(--accent); }
+      .pace-floor b { font-family: "Zodiak", Georgia, serif; font-size: 22px; }
+      .pace-floor p { font-size: 14px; color: var(--ink-soft); }
+
+      .splash-routine { display: grid; gap: 10px; padding-top: 4px; }
+      .splash-routine ul { margin: 0; padding-left: 18px; font-size: 14.5px; display: grid; gap: 3px; }
+      .splash-focus { font-style: italic; color: var(--ink-soft); font-size: 14.5px; }
+      .splash-after { color: var(--ink-soft); font-size: 14px; border-top: 1px solid var(--rule); padding-top: 12px; }
+
+      .splash-login {
+        justify-self: start;
+        display: inline-block;
+        padding: 12px 22px;
+        border: 1px solid var(--rule-strong);
+        border-radius: 999px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 14px;
+      }
+      .splash-login:hover { background: var(--paper-2); }
+      .splash-note { color: var(--ink-soft); font-size: 12.5px; }
+    </style>
+  </head>
+  <body>
+    <main class="splash">
+      <header class="splash-mast">
+        <img src="assets/badge.png" alt="Thames Path 100K race badge">
+        <div>
+          <strong>Thames Path 100K</strong>
+          <span>Next session</span>
+        </div>
+        <div class="splash-count" id="countdown" hidden>
+          <b id="daysLeft"></b>
+          <small>days to the start</small>
+        </div>
+      </header>
+
+      <article class="splash-card" id="card">
+        <div class="hero-head">
+          <span class="type-chip" id="chip">…</span>
+          <span class="muted-block" id="meta"></span>
+        </div>
+        <h1 id="title">Loading the next session…</h1>
+
+        <dl class="detail-row" id="details" hidden>
+          <div><dt>Distance</dt><dd id="distance">-</dd></div>
+          <div><dt>Duration</dt><dd id="duration">-</dd></div>
+          <div><dt>Kit</dt><dd id="equipment">-</dd></div>
+          <div><dt>Fuel</dt><dd id="fuel">-</dd></div>
+        </dl>
+
+        <div class="pace-floor" id="paceFloor" hidden>
+          <span class="kicker">Pace tether</span>
+          <b id="paceRange"></b>
+          <p id="paceNote"></p>
+        </div>
+
+        <div class="splash-routine" id="routines" hidden></div>
+
+        <p class="splash-focus" id="focus" hidden></p>
+        <p class="splash-focus" id="coachNote" hidden></p>
+        <p class="splash-after" id="after" hidden></p>
+      </article>
+
+      <a class="splash-login" href="/journal">Open the journal →</a>
+      <p class="splash-note">Logging, progress and everything else needs a sign-in — this page never does.</p>
+    </main>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+
+      const TYPE_COLOURS = {
+        easy: "--easy", long: "--long", strength: "--strength",
+        recovery: "--recovery", rest: "--rest", mobility: "--mobility",
+        event: "--accent",
+      };
+
+      function dayLabel(iso, today) {
+        const date = new Date(`${iso}T12:00:00`);
+        const nice = new Intl.DateTimeFormat("en-GB", {
+          weekday: "long", day: "numeric", month: "short",
+        }).format(date);
+        const diff = Math.round((date - new Date(`${today}T12:00:00`)) / 86400000);
+        if (diff === 0) return `Today · ${nice}`;
+        if (diff === 1) return `Tomorrow · ${nice}`;
+        return nice;
+      }
+
+      function routineBlock(label, items) {
+        const wrap = document.createElement("div");
+        const kicker = document.createElement("p");
+        kicker.className = "kicker";
+        kicker.textContent = label;
+        const list = document.createElement("ul");
+        for (const item of items) {
+          const li = document.createElement("li");
+          li.textContent = item;
+          list.append(li);
+        }
+        wrap.append(kicker, list);
+        return wrap;
+      }
+
+      async function load() {
+        let data;
+        try {
+          data = await (await fetch("/api/next")).json();
+        } catch {
+          $("title").textContent = "Cannot reach the coach — try again in a minute.";
+          return;
+        }
+
+        if (data.days_to_event != null) {
+          $("daysLeft").textContent = data.days_to_event;
+          $("countdown").hidden = false;
+        }
+
+        const s = data.session;
+        if (!s) {
+          $("chip").textContent = "Done";
+          $("title").textContent = "No sessions left on the plan — see you at the finish.";
+          return;
+        }
+
+        const styles = getComputedStyle(document.documentElement);
+        const typeKey = Object.keys(TYPE_COLOURS).find((k) => (s.type || "").toLowerCase().includes(k)) || "easy";
+        const colour = styles.getPropertyValue(TYPE_COLOURS[typeKey]).trim();
+        const chip = $("chip");
+        chip.textContent = s.type || "Session";
+        chip.style.setProperty("--type-ink", colour);
+
+        $("meta").textContent = `${dayLabel(s.date, data.today)} · Week ${s.week}`;
+        $("title").textContent = s.session;
+
+        $("distance").textContent = s.distance_km ? `${s.distance_km} km` : "-";
+        $("duration").textContent = s.duration || "-";
+        $("equipment").textContent = s.equipment || "-";
+        $("fuel").textContent = s.fuel || "-";
+        $("details").hidden = false;
+
+        if (s.pace) {
+          $("paceRange").textContent = s.pace.range;
+          $("paceNote").textContent = s.pace.note;
+          $("paceFloor").hidden = false;
+        }
+
+        const routines = $("routines");
+        if (s.strength) routines.append(routineBlock("Strength", s.strength));
+        if (s.mobility) routines.append(routineBlock("Stretch", s.mobility));
+        routines.hidden = !routines.children.length;
+
+        if (s.coach_note) {
+          $("coachNote").textContent = `Coach: ${s.coach_note}`;
+          $("coachNote").hidden = false;
+        }
+        if (data.focus) {
+          $("focus").textContent = `This week: ${data.focus.toLowerCase()}.`;
+          $("focus").hidden = false;
+        }
+        if (data.after) {
+          const km = data.after.distance_km ? ` · ${data.after.distance_km} km` : "";
+          $("after").textContent = `Then: ${dayLabel(data.after.date, data.today)} — ${data.after.session}${km}`;
+          $("after").hidden = false;
+        }
+      }
+
+      load();
+    </script>
+  </body>
+</html>

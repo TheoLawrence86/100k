@@ -17,7 +17,7 @@ from contextlib import asynccontextmanager
 from datetime import date, datetime, timedelta
 
 from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -65,16 +65,32 @@ def _principal_email(request: Request) -> str | None:
     return None
 
 
+# The splash page and its data are public: opening the app to see what the
+# next session asks for should not cost a sign-in. Everything personal (logs,
+# kit state, progress) lives under /api and stays gated. Requires Easy Auth's
+# unauthenticated-client action set to AllowAnonymous so requests reach us.
+PUBLIC_API = {"/api/next", "/api/version"}
+
+
 @app.middleware("http")
 async def email_allowlist(request: Request, call_next):
     if ALLOWED_EMAILS:
-        email = _principal_email(request)
-        if email not in ALLOWED_EMAILS:
-            return JSONResponse(
-                {"detail": f"Signed in as {email or 'unknown'}, "
-                           "but this account is not authorised."},
-                status_code=403,
-            )
+        path = request.url.path
+        gated = (path.startswith("/api/") and path not in PUBLIC_API) or path == "/journal"
+        if gated:
+            email = _principal_email(request)
+            if email not in ALLOWED_EMAILS:
+                # Anonymous visitor opening the journal: send them through
+                # the Easy Auth login and back. APIs just get the 403.
+                if path == "/journal" and email is None:
+                    return RedirectResponse(
+                        "/.auth/login/aad?post_login_redirect_uri=/journal"
+                    )
+                return JSONResponse(
+                    {"detail": f"Signed in as {email or 'unknown'}, "
+                               "but this account is not authorised."},
+                    status_code=403,
+                )
     return await call_next(request)
 
 
@@ -134,6 +150,49 @@ def get_client():
     client["days_to_event"] = (event - date.today()).days
     client["night"] = RACE_NIGHT
     return client
+
+
+@app.get("/api/next")
+def get_next():
+    """Public splash data: the next planned session (today or later).
+
+    Plan content only — sessions are shared coach material and carry no
+    per-user logs, so this endpoint needs no identity and no sign-in.
+    """
+    today = date.today()
+    with connect() as conn:
+        rows = conn.execute(
+            "SELECT * FROM sessions WHERE date >= ? ORDER BY date LIMIT 2",
+            (today.isoformat(),),
+        ).fetchall()
+        client = _row("client")
+        focus = None
+        if rows:
+            briefing = conn.execute(
+                "SELECT focus FROM week_briefings WHERE week = ?",
+                (rows[0]["week"],),
+            ).fetchone()
+            focus = briefing["focus"] if briefing else None
+
+    sessions = []
+    for r in rows:
+        d = dict(r)
+        d.update(session_extras(d))
+        sessions.append(d)
+
+    days_to_event = None
+    if client:
+        event = datetime.strptime(client["event_date"], "%Y-%m-%d").date()
+        days_to_event = (event - today).days
+
+    return {
+        "today": today.isoformat(),
+        "days_to_event": days_to_event,
+        "event": client["event"] if client else None,
+        "focus": focus,
+        "session": sessions[0] if sessions else None,
+        "after": sessions[1] if len(sessions) > 1 else None,
+    }
 
 
 def _plan_rows(conn, user_id: int) -> list[dict]:
@@ -582,5 +641,18 @@ def update_kit(item_id: int, body: KitIn, user_id: int = Depends(current_user_id
     return {**dict(row), "checked": bool(row["checked"]), "tested": bool(row["tested"])}
 
 
-# Static frontend, mounted last so /api/* wins. html=True serves index.html at /.
+# Explicit page routes win over the static mount below: the root is the
+# public splash (next session, no sign-in), the journal app lives at /journal
+# (the allowlist middleware sends anonymous visitors through the login).
+@app.get("/")
+def splash_page():
+    return FileResponse(ROOT / "splash.html")
+
+
+@app.get("/journal")
+def journal_page():
+    return FileResponse(ROOT / "index.html")
+
+
+# Static frontend, mounted last so /api/* and the pages above win.
 app.mount("/", StaticFiles(directory=ROOT, html=True), name="static")
